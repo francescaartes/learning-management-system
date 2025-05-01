@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function Navbar() {
+function Header() {
   return (
     <>
       <nav className="navbar navbar-expand-lg border-bottom">
@@ -66,4 +66,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default Header;
