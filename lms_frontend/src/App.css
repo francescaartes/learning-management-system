@@ -1,0 +1,9 @@
+.hover-arrow {
+    visibility: hidden;
+    transition: all 0.2s;
+    font-size: large;
+  }
+  
+  .category-title:hover .hover-arrow {
+    visibility: visible;
+  }
