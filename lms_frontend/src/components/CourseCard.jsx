@@ -1,4 +1,4 @@
-function CourseCard({ cardTitle }) {
+function CourseCard({ cardTitle, img }) {
   return (
     <>
       <div className="card">
@@ -6,7 +6,7 @@ function CourseCard({ cardTitle }) {
           href=""
           className="category-title text-decoration-none text-reset link-primary d-inline-block w-auto"
         >
-          <img src="react.svg" className="card-img-top" alt="..." />
+          <img src={img} className="card-img-top" alt={cardTitle} />
           <div className="card-body">
             <h5 className="card-title">{cardTitle}</h5>
           </div>
