@@ -1,6 +1,6 @@
-import CourseCard from "./CourseCard";
-import CourseCarousel from "./CourseCarousel";
-import CategoryTitle from "./CategoryTitle";
+import CourseCard from "../components/CourseCard";
+import CourseCarousel from "../components/CourseCarousel";
+import CategoryTitle from "../components/CategoryTitle";
 
 function Home() {
   return (

@@ -51,12 +51,19 @@ function Header() {
                 </Link>
               </li>
               <div class="">
-                <button type="button" class="btn btn-outline-dark me-2 mx-lg-2">
-                  Login
-                </button>
-                <button type="button" class="btn btn-primary">
-                  Sign-up
-                </button>
+                <Link to="/login">
+                  <button
+                    type="button"
+                    class="btn btn-outline-dark me-2 mx-lg-2"
+                  >
+                    Log in
+                  </button>
+                </Link>
+                <Link to="/sign-up">
+                  <button type="button" class="btn btn-primary">
+                    Sign up
+                  </button>
+                </Link>
               </div>
             </ul>
           </div>

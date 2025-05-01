@@ -1,11 +1,13 @@
-import Home from "./components/Home";
+import Home from "./pages/Home";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { Routes as Switch, Route } from "react-router-dom";
-import CourseDetail from "./components/CourseDetail";
-import Courses from "./components/Courses";
-import Instructors from "./components/Instructors";
-import About from "./components/About";
+import CourseDetail from "./pages/CourseDetail";
+import Courses from "./pages/Courses";
+import Instructors from "./pages/Instructors";
+import About from "./pages/About";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route path="/courses" element={<Courses />} />
         <Route path="/instructors" element={<Instructors />} />
         <Route path="/about" element={<About />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/sign-up" element={<Signup />} />
       </Switch>
       <div className="">
         <Footer />
