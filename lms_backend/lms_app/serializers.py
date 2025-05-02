@@ -2,22 +2,28 @@ from rest_framework import serializers
 from . import models
 
 # Create your serializers here.
-class InstructorSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Instructor
-        fields = ['name', 'email', 'password', 'qualification', 'mobile_no', 'address']
-
-class CourseCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.CourseCategory
-        fields = ['title', 'description']
+        model = models.User
+        fields = '__all__'
+        exclude = ['password', 'is_staff', 'is_superuser', 'user_permissions', 'groups']
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Course
-        fields = ['category', 'instructor', 'title', 'description']
+        fields = '__all__'
 
-class StudentSerializer(serializers.ModelSerializer):
+class LessonSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Student
-        fields = ['name', 'email', 'password', 'qualification', 'mobile_no', 'address', 'interests']
+        model = models.Lesson
+        fields = '__all__'
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Enrollment
+        fields = '__all__'
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Review
+        fields = '__all__'
