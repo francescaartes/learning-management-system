@@ -19,10 +19,6 @@ function Signup() {
             <label className="form-label">Password</label>
             <input type="password" className="form-control" required />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Interests</label>
-            <input type="password" className="form-control" required />
-          </div>
           <button type="submit" className="btn btn-primary w-100">
             Sign Up
           </button>
