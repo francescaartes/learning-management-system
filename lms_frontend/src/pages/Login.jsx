@@ -9,7 +9,7 @@ function Login() {
           <h3 className="mb-3">Login</h3>
           <form>
             <div className="mb-3">
-              <label className="form-label">Email</label>
+              <label className="form-label">Username</label>
               <input type="email" className="form-control" required />
             </div>
             <div className="mb-3">

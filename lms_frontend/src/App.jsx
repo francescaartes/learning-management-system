@@ -8,6 +8,7 @@ import Instructors from "./pages/Instructors";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/sign-up" element={<Signup />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Switch>
       <div className="">
         <Footer />
