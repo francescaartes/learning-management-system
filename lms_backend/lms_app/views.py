@@ -8,7 +8,17 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class CourseList(generics.RetrieveUpdateDestroyAPIView):
+class RegisterView(generics.CreateAPIView):
+    queryset = models.User.objects.all()
+    serializer_class = serializers.RegisterSerializer
+    permission_classes = [permissions.AllowAny]
+
+class CourseList(generics.ListCreateAPIView):
+    queryset = models.Course.objects.all()
+    serializer_class = serializers.CourseSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Course.objects.all()
     serializer_class = serializers.CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -16,12 +26,12 @@ class CourseList(generics.RetrieveUpdateDestroyAPIView):
 class LessonList(generics.ListCreateAPIView):
     queryset = models.Lesson.objects.all()
     serializer_class = serializers.LessonSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
 class EnrollmentList(generics.ListCreateAPIView):
     queryset = models.Enrollment.objects.all()
     serializer_class = serializers.EnrollmentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
 class ReviewList(generics.ListCreateAPIView):
     queryset = models.Review.objects.all()

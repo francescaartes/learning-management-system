@@ -3,10 +3,31 @@ from . import models
 
 # Create your serializers here.
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
     class Meta:
         model = models.User
-        fields = '__all__'
-        exclude = ['password', 'is_staff', 'is_superuser', 'user_permissions', 'groups']
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name', 'is_instructor', 'bio', 'interests', 'qualifications'
+        ]
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = models.User
+        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name']
+
+    def create(self, validated_data):
+        user = models.User(
+            username=validated_data['username'],
+            email=validated_data.get('email'),
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
