@@ -29,7 +29,8 @@ function Signup() {
         userData
       );
       console.log(response.data);
-      navigate("/dashboard");
+
+      navigate("/login");
     } catch (err) {
       const data = err.response?.data;
       if (data?.username) {

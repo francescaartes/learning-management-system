@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { useUser } from "../contexts/UserContext";
 
 function Login() {
   const [userData, setUserData] = useState({
@@ -9,7 +10,7 @@ function Login() {
     password: "",
   });
   const [error, setError] = useState("");
-
+  const { fetchUser } = useUser();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -35,7 +36,10 @@ function Login() {
 
       const user = jwtDecode(access);
       console.log("Logged in user:", user);
+      console.log(access);
+      console.log(refresh);
 
+      await fetchUser();
       navigate("/dashboard");
     } catch (err) {
       setError("Incorrect password or username.");

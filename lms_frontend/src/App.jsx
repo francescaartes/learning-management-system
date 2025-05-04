@@ -9,26 +9,61 @@ import About from "./pages/About";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import { UserProvider } from "./contexts/UserContext";
+import PrivateRoute from "./route/PrivateRoute";
+import PublicRoute from "./route/PublicRoute";
 
 function App() {
   return (
     <>
-      <div className="">
-        <Header />
-      </div>
-      <Switch>
-        <Route path="/" element={<Home />} />
-        <Route path="/course/:courseId" element={<CourseDetail />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/instructors" element={<Instructors />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/sign-up" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Switch>
-      <div className="">
-        <Footer />
-      </div>
+      <UserProvider>
+        <div className="">
+          <Header />
+        </div>
+        <Switch>
+          <Route path="/" element={<Home />} />
+          <Route path="/course/:courseId" element={<CourseDetail />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/instructors" element={<Instructors />} />
+          <Route path="/about" element={<About />} />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/sign-up"
+            element={
+              <PublicRoute>
+                <Signup />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+        </Switch>
+        <div className="">
+          <Footer />
+        </div>
+      </UserProvider>
     </>
   );
 }
