@@ -107,10 +107,10 @@ function Signup() {
             Sign Up
           </button>
         </form>
-        <p className="text-center mb-0 mt-3 text-danger">
+        <p className="text-center mb-0 pt-2 text-danger">
           {error ? error : ""}
         </p>
-        <p className="mt-3 mb-0 text-center">
+        <p className="mb-0 pt-2 text-center">
           Already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
