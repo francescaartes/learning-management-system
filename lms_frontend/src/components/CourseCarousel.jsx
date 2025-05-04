@@ -1,87 +1,47 @@
-function CourseCarousel() {
+import Carousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
+import CategoryTitle from "./CategoryTitle";
+import CourseCard from "./CourseCard";
+
+function CourseCarousel({ courses }) {
   return (
     <>
-      <div
-        id="carouselExampleDark"
-        className="carousel carousel-dark slide"
-        data-bs-ride="carousel"
-      >
-        <div className="carousel-indicators">
-          <button
-            type="button"
-            data-bs-target="#carouselExampleDark"
-            data-bs-slide-to="0"
-            className="active"
-            aria-current="true"
-            aria-label="Slide 1"
-          ></button>
-          <button
-            type="button"
-            data-bs-target="#carouselExampleDark"
-            data-bs-slide-to="1"
-            aria-label="Slide 2"
-          ></button>
-          <button
-            type="button"
-            data-bs-target="#carouselExampleDark"
-            data-bs-slide-to="2"
-            aria-label="Slide 3"
-          ></button>
+      <section className="container my-5">
+        <div className="row">
+          <CategoryTitle title="What to learn next" link="/courses" />
+          {courses.length > 0 ? (
+            <Carousel
+              responsive={{
+                superLargeDesktop: {
+                  breakpoint: { max: 4000, min: 1280 },
+                  items: 4,
+                },
+                desktop: {
+                  breakpoint: { max: 1280, min: 1024 },
+                  items: 3,
+                },
+                tablet: {
+                  breakpoint: { max: 1024, min: 768 },
+                  items: 2,
+                },
+                mobile: { breakpoint: { max: 768, min: 0 }, items: 1 },
+              }}
+              infinite={false}
+              arrows
+              autoPlay={false}
+              keyBoardControl
+              containerClass="carousel-container"
+              itemClass="px-2"
+            >
+              {courses.map((course) => (
+                <CourseCard key={course.id} course={course} />
+              ))}
+            </Carousel>
+          ) : (
+            <p>No courses available at the moment.</p>
+          )}
         </div>
-        <div className="carousel-inner">
-          <div className="carousel-item active" data-bs-interval="10000">
-            <img src="react.svg" className="d-block w-auto" alt="react.svg" />
-            <div className="carousel-caption d-none d-md-block">
-              <h5>First slide label</h5>
-              <p>
-                Some representative placeholder content for the first slide.
-              </p>
-            </div>
-          </div>
-          <div className="carousel-item" data-bs-interval="2000">
-            <img src="react.svg" className="d-block w-auto" alt="react.svg" />
-            <div className="carousel-caption d-none d-md-block">
-              <h5>Second slide label</h5>
-              <p>
-                Some representative placeholder content for the second slide.
-              </p>
-            </div>
-          </div>
-          <div className="carousel-item">
-            <img src="react.svg" className="d-block w-auto" alt="react.svg" />
-            <div className="carousel-caption d-none d-md-block">
-              <h5>Third slide label</h5>
-              <p>
-                Some representative placeholder content for the third slide.
-              </p>
-            </div>
-          </div>
-        </div>
-        <button
-          className="carousel-control-prev"
-          type="button"
-          data-bs-target="#carouselExampleDark"
-          data-bs-slide="prev"
-        >
-          <span
-            className="carousel-control-prev-icon"
-            aria-hidden="true"
-          ></span>
-          <span className="visually-hidden">Previous</span>
-        </button>
-        <button
-          className="carousel-control-next"
-          type="button"
-          data-bs-target="#carouselExampleDark"
-          data-bs-slide="next"
-        >
-          <span
-            className="carousel-control-next-icon"
-            aria-hidden="true"
-          ></span>
-          <span className="visually-hidden">Next</span>
-        </button>
-      </div>
+      </section>
     </>
   );
 }

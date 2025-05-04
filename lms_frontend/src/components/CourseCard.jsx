@@ -1,19 +1,33 @@
-import { Link } from "react-router-dom";
+import React from "react";
 
-function CourseCard({ courseTitle, img, courseId }) {
+function CourseCard({ course }) {
   return (
     <>
-      <div className="card">
-        <Link
-          to={`/course/${courseId}`}
-          className="category-title text-decoration-none text-reset link-primary d-inline-block w-auto"
-        >
-          <img src={img} className="card-img-top" alt={courseTitle} />
+      <a
+        href={`courses/${course.id}`}
+        className="w-100 text-decoration-none"
+        target="_blank"
+      >
+        <div className="card h-100 shadow-sm">
+          <img
+            src={course.thumbnail}
+            className="card-img-top"
+            alt={course.title}
+            style={{ aspectRatio: "3/2", objectFit: "cover" }}
+          />
           <div className="card-body">
-            <h5 className="card-title">{courseTitle}</h5>
+            <h5 className="card-title">{course.title}</h5>
+            <p className="mb-1 text-muted">{course.instructor_name}</p>
+            <p className="mb-2 text-muted">
+              <i className="bi bi-star-fill text-warning"></i>{" "}
+              {course.average_rating} ({course.rating_count})
+            </p>
+            <p className="fw-bold mb-0 text-primary">
+              {course.price == 0 ? "FREE" : `$${course.price}`}
+            </p>
           </div>
-        </Link>
-      </div>
+        </div>
+      </a>
     </>
   );
 }

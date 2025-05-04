@@ -23,7 +23,7 @@ function App() {
         </div>
         <Switch>
           <Route path="/" element={<Home />} />
-          <Route path="/course/:courseId" element={<CourseDetail />} />
+          <Route path="/courses/:courseId" element={<CourseDetail />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/instructors" element={<Instructors />} />
           <Route path="/about" element={<About />} />

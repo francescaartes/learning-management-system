@@ -59,16 +59,6 @@ function Header() {
                 </Link>
               </li>
               {user ? (
-                <div></div>
-              ) : (
-                <li className="nav-item">
-                  <Link className="nav-link" to="/about">
-                    About
-                  </Link>
-                </li>
-              )}
-
-              {user ? (
                 <li className="nav-item dropdown">
                   <a
                     className="nav-link dropdown-toggle"
