@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, viewsets, views, response, status
 from . import serializers
 from . import models
 
@@ -8,6 +8,14 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'username'
+
+class CurrentUserView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = serializers.UserSerializer(user)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 class RegisterView(generics.CreateAPIView):
     queryset = models.User.objects.all()

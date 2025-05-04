@@ -13,4 +13,5 @@ urlpatterns = [
     path('enrollments/', views.LessonList.as_view()),
     path('reviews/', views.EnrollmentList.as_view()),
     path('register/', views.RegisterView.as_view()),
+    path('me/', views.CurrentUserView.as_view()),
 ]
