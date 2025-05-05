@@ -21,12 +21,17 @@ function Home() {
   }, []);
   return (
     <>
-      <section className="bg-light py-5 text-center">
-        <div className="container">
-          <h1 className="display-5">
-            {user
-              ? `Welcome, ${user.first_name || user.username}!`
-              : "Welcome to StudyHub"}
+      <section
+        className="bg-light py-5 text-center"
+        style={{ height: "30rem" }}
+      >
+        <div className="container d-flex flex-column align-items-center justify-content-center h-100">
+          <h1>
+            <strong>
+              {user
+                ? `Welcome, ${user.first_name || user.username}!`
+                : "Welcome to StudyHub"}
+            </strong>
           </h1>
           <p className="lead">
             {user
@@ -34,7 +39,7 @@ function Home() {
               : "Your personalized learning management system"}
           </p>
           {!user && (
-            <Link to="/sign-up" className="btn btn-primary mt-3">
+            <Link to="/sign-up" className="btn btn-primary mt-3 min">
               Get Started
             </Link>
           )}

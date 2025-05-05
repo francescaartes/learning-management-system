@@ -17,7 +17,7 @@ function App() {
   return (
     <>
       <UserProvider>
-        <div className="">
+        <div className="sticky-top bg-white">
           <Header />
         </div>
         <Switch>

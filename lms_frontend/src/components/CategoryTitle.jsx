@@ -5,9 +5,9 @@ function CategoryTitle({ title, link }) {
   return (
     <Link
       to={link}
-      className="category-title text-decoration-none text-reset link-primary d-inline-block w-auto"
+      className="category-title text-decoration-none text-reset link-primary d-inline-block w-auto m-0"
     >
-      <h4 className="mb-4">
+      <h4 className="m-0">
         {title}
         <span className="hover-arrow">
           <i className="bi bi-chevron-right"></i>

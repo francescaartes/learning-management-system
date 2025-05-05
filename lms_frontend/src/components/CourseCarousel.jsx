@@ -6,9 +6,11 @@ import CourseCard from "./CourseCard";
 function CourseCarousel({ courses }) {
   return (
     <>
-      <section className="container my-5">
+      <section className="container">
         <div className="row">
-          <CategoryTitle title="What to learn next" link="/courses" />
+          <div className="my-4 ps-3 p-0 d-flex align-items-center">
+            <CategoryTitle title="What to learn next" link="/courses" />
+          </div>
           {courses.length > 0 ? (
             <Carousel
               responsive={{
@@ -31,7 +33,7 @@ function CourseCarousel({ courses }) {
               autoPlay={false}
               keyBoardControl
               containerClass="carousel-container"
-              itemClass="px-2"
+              itemClass="pe-3"
             >
               {courses.map((course) => (
                 <CourseCard key={course.id} course={course} />

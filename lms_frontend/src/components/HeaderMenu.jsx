@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import Brand from "./Brand";
+import "../App.css";
 
 function HeaderMenu({ navItems, userItems }) {
   const { user } = useUser();
@@ -62,12 +63,12 @@ function HeaderMenu({ navItems, userItems }) {
             ></button>
           </div>
         </div>
-        <div className="offcanvas-body">
+        <div className="offcanvas-body p-0">
           <ul className="navbar-nav">
             {navItems.map((item) => (
               <li key={item.to} className="nav-item">
                 <Link
-                  className="nav-link"
+                  className="nav-link link-hover px-3"
                   to={item.to}
                   onClick={closeOffcanvas}
                 >
@@ -75,16 +76,15 @@ function HeaderMenu({ navItems, userItems }) {
                 </Link>
               </li>
             ))}
-
-            <li className="nav-item mt-3">
+            <hr className="m-3" />
+            <li className="nav-item">
               {user ? (
                 <>
-                  <hr />
                   {userItems.map((item, idx) => (
                     <li key={idx} className="nav-item">
                       {item.to ? (
                         <Link
-                          className="nav-link"
+                          className="nav-link link-hover px-3"
                           to={item.to}
                           onClick={closeOffcanvas}
                         >
@@ -93,10 +93,10 @@ function HeaderMenu({ navItems, userItems }) {
                       ) : (
                         <button
                           onClick={() => {
-                            item.action;
+                            item.action();
                             closeOffcanvas();
                           }}
-                          className="btn btn-link nav-link text-start text-danger"
+                          className="w-100 text-start nav-link text-danger link-hover px-3"
                         >
                           {item.label}
                         </button>
@@ -105,14 +105,16 @@ function HeaderMenu({ navItems, userItems }) {
                   ))}
                 </>
               ) : (
-                <li className="nav-item mt-3">
+                <li className="nav-item mx-3">
                   <Link to="/login" onClick={closeOffcanvas}>
-                    <button className="btn btn-outline-dark w-100 mb-2">
+                    <button className="btn btn-outline-dark w-100 mt-0">
                       Log in
                     </button>
                   </Link>
                   <Link to="/sign-up" onClick={closeOffcanvas}>
-                    <button className="btn btn-primary w-100">Sign up</button>
+                    <button className="btn btn-primary w-100 my-2">
+                      Sign up
+                    </button>
                   </Link>
                 </li>
               )}

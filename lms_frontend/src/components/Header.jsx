@@ -3,6 +3,7 @@ import { useUser } from "../contexts/UserContext";
 import ProfileDropdown from "../components/ProfileDropdown";
 import HeaderMenu from "./HeaderMenu";
 import Brand from "./Brand";
+import "../App.css";
 
 const navItems = [
   { label: "Home", to: "/" },
@@ -29,13 +30,13 @@ function Header() {
   ];
 
   return (
-    <nav className="navbar navbar-expand-lg border-bottom">
+    <nav className="navbar navbar-expand-lg border-bottom sticky-top">
       <div className="container">
         <Brand />
         <div className="d-none d-lg-flex align-items-center ms-auto">
           <ul className="navbar-nav flex-row">
             {navItems.map((item) => (
-              <li key={item.to} className="nav-item me-2">
+              <li key={item.to} className="nav-item me-2 link-hover">
                 <Link className="nav-link" to={item.to}>
                   {item.label}
                 </Link>

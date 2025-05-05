@@ -19,10 +19,10 @@ function ProfileDropdown({ userItems }) {
           style={{
             aspectRatio: "1/1",
             objectFit: "cover",
-            maxWidth: "3rem",
+            maxWidth: "2.5rem",
             borderRadius: "50%",
           }}
-          className="border px-2"
+          className="border"
           src={user.profile_img}
           alt={user.first_name}
         />
