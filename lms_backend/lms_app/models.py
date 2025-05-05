@@ -7,10 +7,11 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
     interests = models.TextField(blank=True)
     qualifications = models.TextField(blank=True)
+    profile_img = models.ImageField(upload_to='profile_imgs/', blank=True)
 
 class Course(models.Model):
     title = models.CharField(max_length=200)
-    thumbnail = models.ImageField(blank=True)
+    thumbnail = models.ImageField(upload_to='courses_thumbnail/', blank=True)
     description = models.TextField()
     instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses', limit_choices_to={'is_instructor': True})
     created_on = models.DateTimeField(auto_now_add=True)

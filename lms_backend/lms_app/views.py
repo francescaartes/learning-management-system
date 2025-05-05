@@ -14,7 +14,7 @@ class CurrentUserView(views.APIView):
 
     def get(self, request):
         user = request.user
-        serializer = serializers.UserSerializer(user)
+        serializer = serializers.UserSerializer(user, context={'request': request})
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 class RegisterView(generics.CreateAPIView):
