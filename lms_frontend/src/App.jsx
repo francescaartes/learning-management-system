@@ -5,7 +5,6 @@ import { Routes as Switch, Route } from "react-router-dom";
 import CourseDetail from "./pages/CourseDetail";
 import Courses from "./pages/Courses";
 import Instructors from "./pages/Instructors";
-import About from "./pages/About";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
@@ -26,7 +25,6 @@ function App() {
           <Route path="/courses/:courseId" element={<CourseDetail />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/instructors" element={<Instructors />} />
-          <Route path="/about" element={<About />} />
           <Route
             path="/login"
             element={

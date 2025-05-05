@@ -1,35 +1,12 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 
-function CourseDetail({
-  title = "React for Beginners",
-  description = "A complete guide to building dynamic web apps with React.",
-  instructor = "Jane Doe",
-  rating = 4.7,
-  totalStudents = 1243,
-  lastUpdated = "March 2025",
-  language = "English",
-  whatYouWillLearn = [
-    "Build modern web apps",
-    "Understand component-based architecture",
-    "State and props management",
-  ],
-  topics = ["React", "JavaScript", "Hooks", "SPA", "JSX"],
-  includes = [
-    "10 hours of video",
-    "5 downloadable resources",
-    "Certificate of completion",
-  ],
-  requirements = ["Basic HTML/CSS", "Some JavaScript knowledge"],
-  previewUrl = "https://www.w3schools.com/html/mov_bbb.mp4",
-  onEnroll = {},
-}) {
+function CourseDetail({ course }) {
   const { courseId } = useParams();
 
   return (
     <div className="container my-5">
       <div className="row">
-        {/* Left Section */}
         <div className="col-lg-8">
           <h2>
             {title} ({courseId})
