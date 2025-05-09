@@ -1,5 +1,6 @@
-from django.shortcuts import render
 from rest_framework import generics, permissions, viewsets, views, response, status
+from django_filters import rest_framework as filters
+from django.db.models import Count
 from . import serializers
 from . import models
 
@@ -23,14 +24,26 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
 class CourseCategoryList(generics.ListAPIView):
-    queryset = models.CourseCategory.objects.all()
     serializer_class = serializers.CourseCategorySerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = models.CourseCategory.objects.annotate(course_count=Count('courses'))
+        type = self.request.query_params.get('used')
+
+        if type == 'true':
+            queryset = queryset.filter(course_count__gt=0)
+        elif type == 'false':
+            queryset = queryset.filter(course_count=0)
+
+        return queryset
     
 class CourseList(generics.ListCreateAPIView):
     queryset = models.Course.objects.all()
     serializer_class = serializers.CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_fields = ['category', 'is_published']
 
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Course.objects.all()

@@ -30,12 +30,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 class CourseCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CourseCategory
-        fields = ['name']
+        fields = '__all__'
 
 class CourseSerializer(serializers.ModelSerializer):
     average_rating = serializers.FloatField(read_only=True)
     rating_count = serializers.IntegerField(read_only=True)
     instructor_name = serializers.CharField(source='instructor.get_full_name', read_only=True)
+    category = serializers.CharField(source='category.name', read_only=True)
     class Meta:
         model = models.Course
         fields = '__all__'
