@@ -9,6 +9,15 @@ class User(AbstractUser):
     qualifications = models.TextField(blank=True)
     profile_img = models.ImageField(upload_to='profile_imgs/', default="profile_imgs/default_profile.png")
 
+class CourseCategory(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = "Course Categories"
+
 class Course(models.Model):
     title = models.CharField(max_length=200)
     thumbnail = models.ImageField(upload_to='courses_thumbnail/', default="courses_thumbnail/default_thumbnail.jpg")
@@ -19,11 +28,15 @@ class Course(models.Model):
     language = models.CharField(max_length=100)
     learn = models.JSONField(default=list, blank=True)
     topics = models.JSONField(default=list, blank=True)
+    category = models.ForeignKey(CourseCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='courses')
     inclusion = models.JSONField(default=list, blank=True)
     requirements = models.JSONField(default=list, blank=True)
     preview_url = models.URLField(blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
     is_published = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.title} - {self.instructor}'
 
     @property
     def average_rating(self):
@@ -45,6 +58,9 @@ class Lesson(models.Model):
     video_url = models.URLField(blank=True)
     order = models.PositiveIntegerField(default=0)
 
+    def __str__(self):
+        return f'{self.course - self.title}'
+
 class Enrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
@@ -52,6 +68,9 @@ class Enrollment(models.Model):
 
     class Meta:
         unique_together = ('student', 'course')
+    
+    def __str__(self):
+        return f'{self.student} - {self.course}'
 
 class Review(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reviews')
@@ -59,3 +78,6 @@ class Review(models.Model):
     rating = models.PositiveIntegerField(default=5)
     comment = models.TextField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.course} - {self.user}'

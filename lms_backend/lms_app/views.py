@@ -22,6 +22,11 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = serializers.RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
+class CourseCategoryList(generics.ListAPIView):
+    queryset = models.CourseCategory.objects.all()
+    serializer_class = serializers.CourseCategorySerializer
+    permission_classes = [permissions.AllowAny]
+    
 class CourseList(generics.ListCreateAPIView):
     queryset = models.Course.objects.all()
     serializer_class = serializers.CourseSerializer

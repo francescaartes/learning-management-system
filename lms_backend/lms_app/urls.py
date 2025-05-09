@@ -9,6 +9,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('courses/', views.CourseList.as_view()),
     path('courses/<int:pk>/', views.CourseDetail.as_view()),
+    path('categories/', views.CourseCategoryList.as_view()),
     path('lessons/', views.LessonList.as_view()),
     path('enrollments/', views.LessonList.as_view()),
     path('reviews/', views.EnrollmentList.as_view()),

@@ -27,6 +27,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+class CourseCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CourseCategory
+        fields = ['name']
 
 class CourseSerializer(serializers.ModelSerializer):
     average_rating = serializers.FloatField(read_only=True)
