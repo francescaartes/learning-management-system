@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CourseCarousel from "../components/CourseCarousel";
+import api from "../api/api";
 
 function Courses() {
   const [groupedCourses, setGroupedCourses] = useState([]);
 
   const fetchGroupedCourses = async () => {
     try {
-      const catRes = await axios.get(
-        "http://127.0.0.1:8000/api/categories/?used=true"
-      );
+      const catRes = await api.get("categories/?used=true");
       const categoriesData = catRes.data;
       console.log("Categories:", categoriesData);
 
       const courses = categoriesData.map((cat) =>
-        axios.get(
-          `http://127.0.0.1:8000/api/courses/?category=${cat.id}&is_published=true`
-        )
+        api.get(`courses/?category=${cat.id}&is_published=true`)
       );
 
       const courseResponse = await Promise.all(courses);

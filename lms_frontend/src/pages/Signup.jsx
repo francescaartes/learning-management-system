@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import api from "../api/api";
 
 function Signup() {
   const navigate = useNavigate();
@@ -24,10 +25,7 @@ function Signup() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/register/",
-        userData
-      );
+      const response = await api.post("register/", userData);
       console.log(response.data);
 
       navigate("/login");

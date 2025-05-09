@@ -4,6 +4,7 @@ import { useUser } from "../contexts/UserContext";
 import axios from "axios";
 import CourseCarousel from "../components/CourseCarousel";
 import CategoryTitle from "../components/CategoryTitle";
+import api from "../api/api";
 
 function Home() {
   const { user } = useUser();
@@ -11,7 +12,7 @@ function Home() {
 
   const fetchCourses = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/courses/");
+      const response = await api.get("courses/");
       setCourses(response.data);
       console.log(response.data);
     } catch (err) {

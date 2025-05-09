@@ -56,9 +56,14 @@ class LessonList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 class EnrollmentList(generics.ListCreateAPIView):
-    queryset = models.Enrollment.objects.all()
     serializer_class = serializers.EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return models.Enrollment.objects.filter(student=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(student=self.request.user)
 
 class ReviewList(generics.ListCreateAPIView):
     queryset = models.Review.objects.all()

@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import EnrollButton from "../components/EnrollButton";
+import api from "../api/api";
 
 function CourseDetail() {
   const { courseId } = useParams();
@@ -8,9 +10,7 @@ function CourseDetail() {
 
   const fetchCourse = async () => {
     try {
-      const courseRes = await axios.get(
-        `http://127.0.0.1:8000/api/courses/${courseId}`
-      );
+      const courseRes = await api.get(`courses/${courseId}`);
       setCourse(courseRes.data);
       console.log("Course:", courseRes.data);
     } catch (err) {
@@ -83,12 +83,7 @@ function CourseDetail() {
               Your browser does not support the video tag.
             </video>
             <div className="card-body">
-              <button
-                className="btn btn-primary w-100"
-                onClick={course.on_enroll}
-              >
-                Enroll Now
-              </button>
+              <EnrollButton courseId={courseId} />
             </div>
           </div>
         </div>

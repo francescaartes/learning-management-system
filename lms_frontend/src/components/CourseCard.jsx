@@ -6,7 +6,7 @@ function CourseCard({ course }) {
       <a
         href={`courses/${course.id}`}
         className="w-100 text-decoration-none"
-        target="_blank"
+        // target="_blank"
       >
         <div className="card h-100 shadow-sm">
           <img

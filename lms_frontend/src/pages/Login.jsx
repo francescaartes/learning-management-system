@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { useUser } from "../contexts/UserContext";
+import api from "../api/api";
 
 function Login() {
   const [userData, setUserData] = useState({
@@ -24,10 +25,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/token/",
-        userData
-      );
+      const response = await api.post("token/", userData);
 
       const { access, refresh } = response.data;
 
