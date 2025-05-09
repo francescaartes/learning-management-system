@@ -3,17 +3,21 @@ import { Link } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import axios from "axios";
 import CourseCarousel from "../components/CourseCarousel";
+import CategoryTitle from "../components/CategoryTitle";
 
 function Home() {
   const { user } = useUser();
-  const [courses, setCourses] = useState("");
+  const [courses, setCourses] = useState({});
 
   const fetchCourses = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/courses/");
       setCourses(response.data);
       console.log(response.data);
-    } catch {}
+    } catch (err) {
+      console.log("Error Fetching Courses:", err);
+      setCourses({});
+    }
   };
 
   useEffect(() => {
@@ -45,7 +49,12 @@ function Home() {
           )}
         </div>
       </section>
-      <CourseCarousel courses={courses} />
+      <section className="container">
+        <div className="my-4 ps-3 p-0 d-flex align-items-center">
+          <CategoryTitle title="What to learn next" link="/courses" />
+        </div>
+        <CourseCarousel courses={courses} />
+      </section>
     </>
   );
 }

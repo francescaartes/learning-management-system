@@ -8,9 +8,6 @@ function CourseCarousel({ courses }) {
     <>
       <section className="container">
         <div className="row">
-          <div className="my-4 ps-3 p-0 d-flex align-items-center">
-            <CategoryTitle title="What to learn next" link="/courses" />
-          </div>
           {courses.length > 0 ? (
             <Carousel
               responsive={{

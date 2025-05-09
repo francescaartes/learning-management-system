@@ -1,38 +1,60 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-function CourseDetail({ course }) {
+function CourseDetail() {
   const { courseId } = useParams();
+  const [course, setCourse] = useState({});
+
+  const fetchCourse = async () => {
+    try {
+      const courseRes = await axios.get(
+        `http://127.0.0.1:8000/api/courses/${courseId}`
+      );
+      setCourse(courseRes.data);
+      console.log("Course:", courseRes.data);
+    } catch (err) {
+      console.log("Fetch error", err);
+      setCourse({});
+    }
+  };
+
+  useEffect(() => {
+    fetchCourse();
+  }, [courseId]);
 
   return (
     <div className="container my-5">
       <div className="row">
         <div className="col-lg-8">
-          <h2>
-            {title} ({courseId})
-          </h2>
-          <p className="text-muted">By {instructor}</p>
-          <p>{description}</p>
+          <h2>{course.title}</h2>
+          <p className="text-muted">By {course.instructor_name}</p>
+          <p>{course.description}</p>
 
           <ul className="list-inline text-muted">
-            <li className="list-inline-item">Rating: {rating}⭐</li>
-            <li className="list-inline-item">• {totalStudents} students</li>
-            <li className="list-inline-item">• Last updated: {lastUpdated}</li>
-            <li className="list-inline-item">• Language: {language}</li>
+            <li className="list-inline-item">
+              Rating: {course.average_rating}
+              <i className="ms-1 bi bi-star-fill text-warning"></i>
+            </li>
+            {/* <li className="list-inline-item">• {totalStudents} students</li> */}
+            <li className="list-inline-item">
+              • Last updated: {new Date(course.updated_on).toLocaleDateString()}
+            </li>
+            <li className="list-inline-item">• Language: {course.language}</li>
           </ul>
 
           <hr />
 
           <h5>What you'll learn</h5>
           <ul>
-            {whatYouWillLearn.map((item, index) => (
+            {course.learn?.map((item, index) => (
               <li key={index}>{item}</li>
             ))}
           </ul>
 
           <h5>Topics covered</h5>
           <div className="d-flex flex-wrap gap-2">
-            {topics.map((topic, index) => (
+            {course.topics?.map((topic, index) => (
               <span key={index} className="badge bg-secondary">
                 {topic}
               </span>
@@ -41,28 +63,30 @@ function CourseDetail({ course }) {
 
           <h5 className="mt-4">Requirements</h5>
           <ul>
-            {requirements.map((req, index) => (
+            {course.requirements?.map((req, index) => (
               <li key={index}>{req}</li>
             ))}
           </ul>
 
           <h5 className="mt-4">Course Includes</h5>
           <ul>
-            {includes.map((item, index) => (
+            {course.inclusion?.map((item, index) => (
               <li key={index}>{item}</li>
             ))}
           </ul>
         </div>
 
-        {/* Right Sidebar */}
         <div className="col-lg-4">
           <div className="card mb-3">
             <video controls width="100%">
-              <source src={previewUrl} type="video/mp4" />
+              <source src={course.previewUrl} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             <div className="card-body">
-              <button className="btn btn-primary w-100" onClick={onEnroll}>
+              <button
+                className="btn btn-primary w-100"
+                onClick={course.on_enroll}
+              >
                 Enroll Now
               </button>
             </div>

@@ -1,9 +1,56 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import CourseCarousel from "../components/CourseCarousel";
 
 function Courses() {
+  const [groupedCourses, setGroupedCourses] = useState([]);
+
+  const fetchGroupedCourses = async () => {
+    try {
+      const catRes = await axios.get(
+        "http://127.0.0.1:8000/api/categories/?used=true"
+      );
+      const categoriesData = catRes.data;
+      console.log("Categories:", categoriesData);
+
+      const courses = categoriesData.map((cat) =>
+        axios.get(
+          `http://127.0.0.1:8000/api/courses/?category=${cat.id}&is_published=true`
+        )
+      );
+
+      const courseResponse = await Promise.all(courses);
+      console.log(
+        "Courses:",
+        courseResponse.map((data) => data.data)
+      );
+
+      const grouped = {};
+      categoriesData.forEach((cat, id) => {
+        grouped[cat.name] = courseResponse[id].data;
+      });
+      console.log("Grouped data:", grouped);
+
+      setGroupedCourses(grouped);
+    } catch (err) {
+      console.log("Error fetching courses/categories:", err);
+      setGroupedCourses({});
+    }
+  };
+
+  useEffect(() => {
+    fetchGroupedCourses();
+  }, []);
+
   return (
     <div className="container">
-      <h4 className="mt-4">List of Courses</h4>
+      <h4 className="my-4">Courses</h4>
+      {Object.entries(groupedCourses).map(([category, courses]) => (
+        <div key={category} className="mb-4">
+          <h5 className="mb-3">{category}</h5>
+          <CourseCarousel courses={courses} />
+        </div>
+      ))}
     </div>
   );
 }

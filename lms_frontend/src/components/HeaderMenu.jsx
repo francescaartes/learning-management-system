@@ -77,7 +77,7 @@ function HeaderMenu({ navItems, userItems }) {
               </li>
             ))}
             <hr className="m-3" />
-            <li className="nav-item">
+            <div className="nav-item">
               {user ? (
                 <>
                   {userItems.map((item, idx) => (
@@ -105,7 +105,7 @@ function HeaderMenu({ navItems, userItems }) {
                   ))}
                 </>
               ) : (
-                <li className="nav-item mx-3">
+                <div className="nav-item mx-3">
                   <Link to="/login" onClick={closeOffcanvas}>
                     <button className="btn btn-outline-dark w-100 mt-0">
                       Log in
@@ -116,9 +116,9 @@ function HeaderMenu({ navItems, userItems }) {
                       Sign up
                     </button>
                   </Link>
-                </li>
+                </div>
               )}
-            </li>
+            </div>
           </ul>
         </div>
       </div>
