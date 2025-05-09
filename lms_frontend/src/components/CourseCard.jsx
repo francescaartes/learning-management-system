@@ -23,7 +23,7 @@ function CourseCard({ course }) {
               {course.average_rating} ({course.rating_count})
             </p>
             <p className="fw-bold mb-0 text-primary">
-              {course.price == 0 ? "FREE" : `$${course.price}`}
+              {course.price == 0 ? "" : `$${course.price}`}
             </p>
           </div>
         </div>

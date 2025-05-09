@@ -1,5 +1,4 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import EnrollButton from "../components/EnrollButton";
 import api from "../api/api";
@@ -7,6 +6,7 @@ import api from "../api/api";
 function CourseDetail() {
   const { courseId } = useParams();
   const [course, setCourse] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const fetchCourse = async () => {
     try {
@@ -16,12 +16,18 @@ function CourseDetail() {
     } catch (err) {
       console.log("Fetch error", err);
       setCourse({});
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchCourse();
   }, [courseId]);
+
+  if (loading) {
+    return <div> Wait </div>;
+  }
 
   return (
     <div className="container my-5">
@@ -33,8 +39,8 @@ function CourseDetail() {
 
           <ul className="list-inline text-muted">
             <li className="list-inline-item">
-              Rating: {course.average_rating}
-              <i className="ms-1 bi bi-star-fill text-warning"></i>
+              Rating:<i className="ms-1 bi bi-star-fill text-warning"></i>{" "}
+              {course.average_rating} ({course.rating_count})
             </li>
             {/* <li className="list-inline-item">• {totalStudents} students</li> */}
             <li className="list-inline-item">
@@ -83,7 +89,7 @@ function CourseDetail() {
               Your browser does not support the video tag.
             </video>
             <div className="card-body">
-              <EnrollButton courseId={courseId} />
+              <EnrollButton courseDetails={course} />
             </div>
           </div>
         </div>
