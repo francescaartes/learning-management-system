@@ -27,7 +27,10 @@ function ProfileDropdown({ userItems }) {
           alt={user.first_name}
         />
       </a>
-      <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
+      <ul
+        className="dropdown-menu dropdown-menu-end"
+        aria-labelledby="navbarDropdown"
+      >
         {userItems.map((item, idx) => (
           <li key={idx}>
             {item.to ? (

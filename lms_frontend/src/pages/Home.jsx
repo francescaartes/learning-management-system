@@ -12,9 +12,9 @@ function Home() {
 
   const fetchCourses = async () => {
     try {
-      const response = await api.get("courses/");
-      setCourses(response.data);
-      console.log(response.data);
+      const response = await api.get("courses/?page=1&page_size=6");
+      setCourses(response.data.results);
+      console.log(response.data.results);
     } catch (err) {
       console.log("Error Fetching Courses:", err);
       setCourses({});

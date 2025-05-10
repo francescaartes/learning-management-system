@@ -2,23 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import EnrollButton from "../components/EnrollButton";
 import api from "../api/api";
+import StudentReviews from "../components/StudentReviews";
 
 function CourseDetail() {
   const { courseId } = useParams();
   const [course, setCourse] = useState({});
-  const [reviews, setReviews] = useState({});
   const [loading, setLoading] = useState(true);
-  const [seeMore, setSeeMore] = useState({});
-
-  const fetchReviews = async () => {
-    try {
-      const reviewRes = await api.get(`reviews/?course=${courseId}`);
-      setReviews(reviewRes.data);
-    } catch (err) {
-      console.log("Fetch reviews error", err);
-      setReviews({});
-    }
-  };
 
   const fetchCourse = async () => {
     try {
@@ -35,15 +24,7 @@ function CourseDetail() {
 
   useEffect(() => {
     fetchCourse();
-    fetchReviews();
   }, [courseId]);
-
-  const toggleSeeMore = (id) => {
-    setSeeMore((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
 
   if (loading) {
     return <div></div>;
@@ -96,8 +77,8 @@ function CourseDetail() {
 
           <h5 className="mt-4">Course Includes</h5>
           <ul>
-            {course.inclusion?.map((item, index) => (
-              <li key={index}>{item}</li>
+            {course.inclusion?.map((item, id) => (
+              <li key={id}>{item}</li>
             ))}
           </ul>
         </div>
@@ -116,52 +97,7 @@ function CourseDetail() {
       </div>
       <div>
         <h5 className="mt-4 mb-3">Student Reviews</h5>
-        {reviews.length > 0 ? (
-          <div className="row g-4">
-            {reviews.map((review) => (
-              <div key={review.id} className="col-sm-12 col-md-6 col-lg-4">
-                <div className="card p-3 h-100">
-                  <div className="d-flex align-items-center mb-3">
-                    <img
-                      src={review.user.profile_img}
-                      alt={review.user.username}
-                      style={{
-                        aspectRatio: "1/1",
-                        objectFit: "cover",
-                        maxWidth: "3rem",
-                        borderRadius: "50%",
-                      }}
-                      className="border me-2"
-                    />
-                    <div className="m-0 p-0 d-flex flex-column justify-content-center">
-                      <h6 className="p-0 m-0">
-                        {review.user.first_name} {review.user.last_name}
-                      </h6>
-                      <p className="m-0 p-0 text-muted">
-                        <i className="ms-1 bi bi-star-fill text-warning me-1"></i>
-                        {review.rating}/5
-                      </p>
-                    </div>
-                  </div>
-                  <p>
-                    {seeMore[review.id]
-                      ? review.comment
-                      : `${review.comment.substring(0, 150)}...`}
-                    <a
-                      className="h-auto w-auto ms-2 m-0 p-0 text-black"
-                      onClick={() => toggleSeeMore(review.id)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {seeMore[review.id] ? "See less" : "See more"}
-                    </a>
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div>No reviews yet.</div>
-        )}
+        <StudentReviews courseId={course.id} />
       </div>
     </div>
   );

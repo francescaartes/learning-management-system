@@ -26,9 +26,7 @@ function CourseCarousel({ courses }) {
                 mobile: { breakpoint: { max: 768, min: 0 }, items: 1 },
               }}
               infinite={false}
-              arrows
-              autoPlay={false}
-              keyBoardControl
+              arrows={true}
               containerClass="carousel-container"
               itemClass="pe-3"
             >
