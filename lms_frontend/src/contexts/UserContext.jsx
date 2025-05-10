@@ -1,6 +1,5 @@
 import { useContext, createContext, useState, useEffect } from "react";
 import api from "../api/api";
-import { refreshToken } from "../api/refreshToken";
 
 const UserContext = createContext();
 

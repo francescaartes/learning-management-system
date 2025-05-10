@@ -44,7 +44,7 @@ class Course(models.Model):
         total_reviews = reviews.count()
         if total_reviews > 0:
             total_rating = sum([review.rating for review in reviews])
-            return total_rating / total_reviews
+            return round(total_rating / total_reviews, 1)
         return 0 
     
     @property
@@ -79,5 +79,8 @@ class Review(models.Model):
     comment = models.TextField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('user', 'course')
+
     def __str__(self):
-        return f'{self.course} - {self.user}'
+        return f'{self.user} - {self.course} '

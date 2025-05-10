@@ -66,6 +66,11 @@ class EnrollmentList(generics.ListCreateAPIView):
         serializer.save(student=self.request.user)
 
 class ReviewList(generics.ListCreateAPIView):
-    queryset = models.Review.objects.all()
     serializer_class = serializers.ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        course_id = self.request.query_params.get('course')
+        if course_id:
+            return models.Review.objects.filter(course_id=course_id)
+        return models.Review.objects.none()

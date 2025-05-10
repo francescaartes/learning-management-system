@@ -16,7 +16,18 @@ function CourseCard({ course }) {
             style={{ aspectRatio: "3/2", objectFit: "cover" }}
           />
           <div className="card-body">
-            <h5 className="card-title">{course.title}</h5>
+            <h5
+              className="card-title"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {course.title}
+            </h5>
             <p className="mb-1 text-muted">{course.instructor_name}</p>
             <p className="mb-2 text-muted">
               <i className="bi bi-star-fill text-warning"></i>{" "}
