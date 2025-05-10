@@ -34,8 +34,6 @@ function Login() {
 
       const user = jwtDecode(access);
       console.log("Logged in user:", user);
-      console.log(access);
-      console.log(refresh);
 
       await fetchUser();
       navigate("/dashboard");

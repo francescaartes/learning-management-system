@@ -26,8 +26,14 @@ function EnrollButton({ courseDetails }) {
         }
       );
       setStatus(true);
-      console.log("Successfully enrolled in the course:", response.data);
+      console.log(
+        "Successfully enrolled in the course:",
+        response.data.results
+      );
     } catch (err) {
+      if (err.response) {
+        console.log(err.response.data);
+      }
       console.log("Enroll failed:", err);
       setStatus(false);
     }
@@ -40,7 +46,7 @@ function EnrollButton({ courseDetails }) {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const isEnrolled = res.data.some(
+        const isEnrolled = res.data.results.some(
           (enroll) =>
             enroll.course === courseDetails.id && enroll.student === user.id
         );

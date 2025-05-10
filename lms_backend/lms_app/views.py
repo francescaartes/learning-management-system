@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, viewsets, views, response, status
+from rest_framework import generics, permissions, viewsets, views, response, status, exceptions
 from django_filters import rest_framework as filters
 from django.db.models import Count
 from . import serializers
@@ -63,7 +63,19 @@ class EnrollmentList(generics.ListCreateAPIView):
         return models.Enrollment.objects.filter(student=self.request.user)
     
     def perform_create(self, serializer):
-        serializer.save(student=self.request.user)
+        user = self.request.user
+        course = serializer.validated_data['course']
+
+        if course.instructor == user:
+            raise exceptions.ValidationError("Instructors cannot enroll in their own course.")
+        
+        if models.Enrollment.objects.filter(course=course, student=user ).exists():
+            raise exceptions.ValidationError("You are already enrolled in this course.")
+
+        serializer.save(student=user)
+
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
 class ReviewList(generics.ListCreateAPIView):
     serializer_class = serializers.ReviewSerializer
