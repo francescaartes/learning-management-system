@@ -33,7 +33,7 @@ api.interceptors.response.use(
                 return api(originalReq);
             } else {
                 console.error("Could not refresh token. Redirecting to login...");
-                window.location.href = "/login";
+                
             }
         }
 

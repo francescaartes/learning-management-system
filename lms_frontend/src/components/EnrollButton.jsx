@@ -16,15 +16,10 @@ function EnrollButton({ courseDetails }) {
     }
 
     try {
-      const response = await api.post(
-        "enrollments/",
-        { course: courseDetails.id, student: user.id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.post("enrollments/", {
+        course_id: courseDetails.id,
+        student: user.id,
+      });
       setStatus(true);
       console.log(
         "Successfully enrolled in the course:",
@@ -32,7 +27,7 @@ function EnrollButton({ courseDetails }) {
       );
     } catch (err) {
       if (err.response) {
-        console.log(err.response.data);
+        console.log(err.response);
       }
       console.log("Enroll failed:", err);
       setStatus(false);
@@ -42,9 +37,7 @@ function EnrollButton({ courseDetails }) {
   useEffect(() => {
     const checkEnrollment = async () => {
       try {
-        const res = await api.get("enrollments/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("enrollments/");
 
         const isEnrolled = res.data.results.some(
           (enroll) =>
@@ -61,15 +54,14 @@ function EnrollButton({ courseDetails }) {
     }
   }, [user, courseDetails, token]);
 
-  if (user?.id === courseDetails.instructor) {
-    return <></>;
-  }
-
   return (
     <>
-      {status ? (
-        <button className="btn btn-primary w-100" disabled>
-          Enrolled
+      {user?.id === courseDetails.instructor || status ? (
+        <button
+          className="btn btn-primary w-100"
+          onClick={() => navigate(`/courses/${courseDetails.id}/lessons`)}
+        >
+          Go to Course
         </button>
       ) : (
         <button className="btn btn-primary w-100" onClick={handleEnroll}>

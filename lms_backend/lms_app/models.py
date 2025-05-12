@@ -59,7 +59,7 @@ class Lesson(models.Model):
     order = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f'{self.course - self.title}'
+        return f'{self.title} - {self.course}'
 
 class Enrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')

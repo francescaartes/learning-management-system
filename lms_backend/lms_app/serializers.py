@@ -42,11 +42,14 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LessonSerializer(serializers.ModelSerializer):
+    course = CourseSerializer(read_only=True)
     class Meta:
         model = models.Lesson
         fields = '__all__'
 
 class EnrollmentSerializer(serializers.ModelSerializer):
+    course = CourseSerializer(read_only=True)
+    course_id = serializers.PrimaryKeyRelatedField(queryset=models.Course.objects.all(), write_only=True, source='course')
     class Meta:
         model = models.Enrollment
         fields = '__all__'
@@ -56,3 +59,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Review
         fields = '__all__'
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)

@@ -8,7 +8,7 @@ function HeaderMenu({ navItems, userItems }) {
 
   const closeOffcanvas = () => {
     const closeBtn = document.querySelector("#mobileMenu .btn-close");
-    if (closeBtn) closeBtn.click(); // simulate user click to close
+    if (closeBtn) closeBtn.click();
   };
 
   return (
