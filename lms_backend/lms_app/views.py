@@ -43,7 +43,7 @@ class CourseList(generics.ListCreateAPIView):
     serializer_class = serializers.CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.DjangoFilterBackend]
-    filterset_fields = ['category', 'is_published']
+    filterset_fields = ['category', 'is_published', 'instructor']
 
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Course.objects.all()
@@ -51,10 +51,13 @@ class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 class LessonList(generics.ListCreateAPIView):
-    queryset = models.Lesson.objects.all()
     serializer_class = serializers.LessonSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        course_id = self.kwargs['pk']
+        return models.Lesson.objects.filter(course=course_id).order_by('order')
+    
 class EnrollmentList(generics.ListCreateAPIView):
     serializer_class = serializers.EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -64,7 +67,7 @@ class EnrollmentList(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         user = self.request.user
-        course = serializer.validated_data['course']
+        course = serializer.validated_data.get('course')
 
         if course.instructor == user:
             raise exceptions.ValidationError("Instructors cannot enroll in their own course.")
@@ -73,9 +76,6 @@ class EnrollmentList(generics.ListCreateAPIView):
             raise exceptions.ValidationError("You are already enrolled in this course.")
 
         serializer.save(student=user)
-
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
 
 class ReviewList(generics.ListCreateAPIView):
     serializer_class = serializers.ReviewSerializer
