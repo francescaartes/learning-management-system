@@ -6,8 +6,34 @@ class User(AbstractUser):
     is_instructor = models.BooleanField(default=False)
     bio = models.TextField(blank=True)
     interests = models.TextField(blank=True)
-    qualifications = models.TextField(blank=True)
     profile_img = models.ImageField(upload_to='profile_imgs/', default="profile_imgs/default_profile.png")
+
+class InstructorProfile(models.Model):
+    TEACHING_EXPERIENCE_CHOICES = [
+        ("none", "No experience"),
+        ("informal", "Informal or peer teaching"),
+        ("online", "Online teaching experience"),
+        ("in_person", "In-person professional teaching"),
+        ("both", "Both online and in-person teaching"),
+    ]
+
+    VIDEO_CREATION_EXPERIENCE_CHOICES = [
+        ("none", "No experience"),
+        ("basic", "Basic (e.g. Zoom recordings, phone camera)"),
+        ("intermediate", "Intermediate (basic editing, YouTube uploads)"),
+        ("advanced", "Advanced (course-quality video production)"),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="instructor_profile")
+    teaching_experience = models.CharField(max_length=20, choices=TEACHING_EXPERIENCE_CHOICES)
+    video_creation_experience = models.CharField(max_length=20, choices=VIDEO_CREATION_EXPERIENCE_CHOICES)
+    agreed_to_policy = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+    class Meta:
+        verbose_name_plural = "Instructor Profile"
 
 class CourseCategory(models.Model):
     name = models.CharField(max_length=100)

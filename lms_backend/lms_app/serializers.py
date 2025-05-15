@@ -6,7 +6,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = [
-            'id', 'username', 'email', 'first_name', 'last_name', 'is_instructor', 'bio', 'interests', 'qualifications', 'profile_img'
+            'id', 'username', 'email', 'first_name', 'last_name', 'is_instructor', 'bio', 'interests', 'profile_img'
         ]
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -26,6 +26,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+class InstructorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.InstructorProfile
+        fields = '__all__'
+        read_only_fields = ['user', 'created_on']
+
+    def create(self, validated_data):
+        if self.user.is_instructor:
+            serializers.ValidationError("You are already an instructor")
+
+        return super().create(validated_data)
 
 class CourseCategorySerializer(serializers.ModelSerializer):
     class Meta:

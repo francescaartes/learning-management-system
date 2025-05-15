@@ -23,6 +23,16 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = serializers.RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
+class InstructorProfileCreateList(generics.ListCreateAPIView):
+    serializer_class = serializers.InstructorProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return models.InstructorProfile.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 class CourseCategoryList(generics.ListAPIView):
     serializer_class = serializers.CourseCategorySerializer
     permission_classes = [permissions.AllowAny]
@@ -38,12 +48,14 @@ class CourseCategoryList(generics.ListAPIView):
 
         return queryset
     
-class CourseList(generics.ListCreateAPIView):
-    queryset = models.Course.objects.all()
+class CourseList(generics.ListAPIView):
     serializer_class = serializers.CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.DjangoFilterBackend]
-    filterset_fields = ['category', 'is_published', 'instructor']
+    filterset_fields = ['category']
+
+    def get_queryset(self):
+        return models.Course.objects.filter(is_published=True)
 
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Course.objects.all()

@@ -13,10 +13,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -27,7 +29,7 @@ SECRET_KEY = 'django-insecure-z4$tm%n&gwmnjyzu_3q08+y70$4^rljz#s7t&&@)p7@mgcn59f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'lms_app.User'
 
@@ -84,11 +86,11 @@ WSGI_APPLICATION = 'lms_backend.wsgi.application'
 DATABASES = {
     "default": {
         'ENGINE': "django.db.backends.mysql",
-        'NAME': 'lms_db',
-        'USER': 'root',
-        'PASSWORD': 'Chezka.1924',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.getenv("NAME"),
+        'USER': os.getenv("USER"),
+        'PASSWORD': os.getenv("PASSWORD"),
+        'HOST': os.getenv("HOST"),
+        'PORT': os.getenv("PORT"),
     }
 }
 
@@ -127,6 +129,7 @@ REST_FRAMEWORK = {
 # }
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWS_CREDENTIALS = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

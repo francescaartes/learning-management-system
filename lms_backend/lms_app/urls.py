@@ -15,4 +15,5 @@ urlpatterns = [
     path('reviews/', views.ReviewList.as_view()),
     path('register/', views.RegisterView.as_view()),
     path('me/', views.CurrentUserView.as_view()),
+    path('instructor_profile/', views.InstructorProfileCreateList.as_view())
 ]
