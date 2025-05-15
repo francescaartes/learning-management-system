@@ -14,7 +14,7 @@ function Courses() {
       console.log("Categories:", categoriesData);
 
       const courses = categoriesData.map((cat) =>
-        api.get(`courses/?category=${cat.id}&is_published=true`)
+        api.get(`courses/?category=${cat.id}`)
       );
 
       const courseResponse = await Promise.all(courses);

@@ -12,6 +12,8 @@ import Profile from "./pages/Profile";
 import { UserProvider } from "./contexts/UserContext";
 import PrivateRoute from "./route/PrivateRoute";
 import PublicRoute from "./route/PublicRoute";
+import CourseLessons from "./pages/CourseLessons";
+import StartTeaching from "./pages/StartTeaching";
 
 function App() {
   return (
@@ -22,8 +24,12 @@ function App() {
         </div>
         <Switch>
           <Route path="/" element={<Home />} />
-          <Route path="/courses/:courseId" element={<CourseDetail />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:courseId" element={<CourseDetail />} />
+          <Route
+            path="/courses/:courseId/lessons"
+            element={<CourseLessons />}
+          />
           <Route path="/instructors" element={<Instructors />} />
           <Route
             path="/login"
@@ -57,6 +63,7 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route path="/start_teaching" element={<StartTeaching />} />
         </Switch>
         <div className="">
           <Footer />

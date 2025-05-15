@@ -5,12 +5,6 @@ import HeaderMenu from "./HeaderMenu";
 import Brand from "./Brand";
 import "../App.css";
 
-const navItems = [
-  { label: "Home", to: "/" },
-  { label: "Courses", to: "/courses" },
-  { label: "Instructors", to: "/instructors" },
-];
-
 function Header() {
   const { user, setUser } = useUser();
   const navigate = useNavigate();
@@ -21,12 +15,24 @@ function Header() {
     navigate("/login");
   };
 
+  const navItems = [
+    { label: "Home", to: "/" },
+    { label: "Explore", to: "/courses" },
+  ];
+
+  if (user) {
+    navItems.push({ label: "Dashboard", to: "/dashboard" });
+  }
+
   const userItems = [
-    { label: "Dashboard", to: "/dashboard" },
     { label: "Profile", to: "/profile" },
     { label: "Settings", to: "/settings" },
     { label: "Logout", action: handleLogout },
   ];
+
+  if (!user?.is_instructor) {
+    navItems.push({ label: "Start Teaching", to: "/start_teaching" });
+  }
 
   return (
     <nav className="navbar navbar-expand-lg border-bottom sticky-top">

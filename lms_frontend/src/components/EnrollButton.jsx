@@ -41,7 +41,7 @@ function EnrollButton({ courseDetails }) {
 
         const isEnrolled = res.data.results.some(
           (enroll) =>
-            enroll.course === courseDetails.id && enroll.student === user.id
+            enroll.course.id === courseDetails.id && enroll.student === user.id
         );
         setStatus(isEnrolled);
       } catch (err) {

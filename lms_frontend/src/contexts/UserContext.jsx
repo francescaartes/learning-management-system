@@ -29,6 +29,7 @@ export const UserProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchUser();
   }, []);
 

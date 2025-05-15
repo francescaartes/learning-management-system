@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
-import axios from "axios";
 import CourseCarousel from "../components/CourseCarousel";
 import CategoryTitle from "../components/CategoryTitle";
 import api from "../api/api";
