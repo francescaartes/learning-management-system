@@ -52,10 +52,25 @@ class CourseSerializer(serializers.ModelSerializer):
     average_rating = serializers.FloatField(read_only=True)
     rating_count = serializers.IntegerField(read_only=True)
     instructor_name = serializers.CharField(source='instructor.get_full_name', read_only=True)
-    category = serializers.CharField(source='category.name', read_only=True)
+    instructor = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = models.Course
         fields = '__all__'
+
+    def validate(self, data):
+        is_publishing = data.get('is_published', self.instance.is_published if self.instance else False)
+
+        if is_publishing:
+            required_fields = ['title', 'description', 'language']
+            for field in required_fields:
+                value = data.get(field) or getattr(self.instance, field, None)
+                if not value:
+                    raise serializers.ValidationError({field: f"{field} is required to publish the course."})
+
+            course = self.instance
+            if course and course.lessons.count() == 0:
+                raise serializers.ValidationError("You must add at least one lesson before publishing.")
+        return data
 
 class LessonSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)

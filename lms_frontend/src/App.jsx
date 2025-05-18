@@ -14,6 +14,7 @@ import PrivateRoute from "./route/PrivateRoute";
 import PublicRoute from "./route/PublicRoute";
 import CourseLessons from "./pages/CourseLessons";
 import StartTeaching from "./pages/StartTeaching";
+import CreateCourse from "./pages/CreateCourse";
 
 function App() {
   return (
@@ -64,6 +65,14 @@ function App() {
             }
           />
           <Route path="/start_teaching" element={<StartTeaching />} />
+          <Route
+            path="/create_course"
+            element={
+              <PrivateRoute>
+                <CreateCourse />
+              </PrivateRoute>
+            }
+          />
         </Switch>
         <div className="">
           <Footer />

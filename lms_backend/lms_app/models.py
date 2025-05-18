@@ -45,13 +45,13 @@ class CourseCategory(models.Model):
         verbose_name_plural = "Course Categories"
 
 class Course(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, blank=True)
     thumbnail = models.ImageField(upload_to='courses_thumbnail/', default="courses_thumbnail/default_thumbnail.jpg")
-    description = models.TextField()
+    description = models.TextField(blank=True)
     instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses', limit_choices_to={'is_instructor': True})
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    language = models.CharField(max_length=100)
+    language = models.CharField(max_length=100, blank=True)
     learn = models.JSONField(default=list, blank=True)
     topics = models.JSONField(default=list, blank=True)
     category = models.ForeignKey(CourseCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='courses')

@@ -36,15 +36,22 @@ class InstructorProfileCreateList(generics.ListCreateAPIView):
 class CourseCategoryList(generics.ListAPIView):
     serializer_class = serializers.CourseCategorySerializer
     permission_classes = [permissions.AllowAny]
+    pagination_class = None
 
     def get_queryset(self):
-        queryset = models.CourseCategory.objects.annotate(course_count=Count('courses'))
-        type = self.request.query_params.get('used')
+        queryset = models.CourseCategory.objects.all()
+        if self.request.query_params.get('used'):
+            queryset = models.CourseCategory.objects.annotate(course_count=Count('courses'))
+            type = self.request.query_params.get('used')
 
-        if type == 'true':
-            queryset = queryset.filter(course_count__gt=0)
-        elif type == 'false':
-            queryset = queryset.filter(course_count=0)
+            if type == 'true':
+                queryset = queryset.filter(course_count__gt=0)
+            elif type == 'false':
+                queryset = queryset.filter(course_count=0)
+
+        if self.request.query_params.get("search"):
+            search = self.request.query_params.get("search")
+            queryset = models.CourseCategory.objects.filter(name__icontains=search)
 
         return queryset
     
@@ -56,11 +63,31 @@ class CourseList(generics.ListAPIView):
 
     def get_queryset(self):
         return models.Course.objects.filter(is_published=True)
+    
+class CourseCreate(generics.CreateAPIView):
+    serializer_class = serializers.CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(instructor=self.request.user)
 
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.Course.objects.all()
     serializer_class = serializers.CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = models.Course.objects.filter(is_published=True) 
+        
+        if user.is_authenticated:
+            return queryset | models.Course.objects.filter(instructor=user)
+        
+        return queryset
+    
+    def perform_update(self, serializer):
+        if self.request.user != serializer.instance.instructor:
+            raise permissions.PermissionDenied("You do not have permission to edit this course.")
+        serializer.save()
 
 class LessonList(generics.ListCreateAPIView):
     serializer_class = serializers.LessonSerializer
@@ -69,6 +96,11 @@ class LessonList(generics.ListCreateAPIView):
     def get_queryset(self):
         course_id = self.kwargs['pk']
         return models.Lesson.objects.filter(course=course_id).order_by('order')
+    
+    def perform_create(self, serializer):
+        course_id = self.kwargs['pk']
+        course = models.Course.objects.get(id=course_id, instructor=self.request.user)
+        serializer.save(course=course)
     
 class EnrollmentList(generics.ListCreateAPIView):
     serializer_class = serializers.EnrollmentSerializer

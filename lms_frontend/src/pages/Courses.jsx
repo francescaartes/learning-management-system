@@ -10,7 +10,7 @@ function Courses() {
   const fetchGroupedCourses = async () => {
     try {
       const catRes = await api.get("categories/?used=true");
-      const categoriesData = catRes.data.results;
+      const categoriesData = catRes.data;
       console.log("Categories:", categoriesData);
 
       const courses = categoriesData.map((cat) =>
