@@ -52,7 +52,7 @@ class CourseList(generics.ListAPIView):
     serializer_class = serializers.CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.DjangoFilterBackend]
-    filterset_fields = ['category']
+    filterset_fields = ['category', 'instructor']
 
     def get_queryset(self):
         return models.Course.objects.filter(is_published=True)

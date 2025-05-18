@@ -42,7 +42,6 @@ function Profile() {
       );
       setPublishedCourses(publishedRes.data.results);
       setCountP(publishedRes.data.count);
-      set;
     } catch (err) {
       console.log("Published courses error:", err);
     } finally {
@@ -110,10 +109,10 @@ function Profile() {
       )}
       {total_pageP > 1 && (
         <PaginationControl
-          pageE={pageP}
-          setPageE={setPageP}
-          countE={countP}
-          pageSizeE={pageSizeP}
+          page={pageP}
+          setPage={setPageP}
+          count={countP}
+          pageSize={pageSizeP}
         />
       )}
       {user.is_instructor && enrolledCourses.length == 0 ? (
@@ -137,10 +136,10 @@ function Profile() {
           </div>
           {total_pageE > 1 && (
             <PaginationControl
-              pageE={pageE}
-              setPageE={setPageE}
-              countE={countE}
-              pageSizeE={pageSizeE}
+              page={pageE}
+              setPage={setPageE}
+              count={countE}
+              pageSize={pageSizeE}
             />
           )}
         </>

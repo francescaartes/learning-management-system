@@ -34,10 +34,14 @@ class InstructorProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'created_on']
 
     def create(self, validated_data):
-        if self.user.is_instructor:
-            serializers.ValidationError("You are already an instructor")
+        user = self.context["request"].user
+        if user.is_instructor:
+            raise serializers.ValidationError("You are already an instructor.")
 
-        return super().create(validated_data)
+        user.is_instructor = True
+        user.save()
+
+        return super().create({**validated_data, "user": user})
 
 class CourseCategorySerializer(serializers.ModelSerializer):
     class Meta:
