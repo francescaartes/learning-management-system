@@ -2,34 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useUser } from "../contexts/UserContext";
 import api from "../api/api";
 import CourseCard from "../components/CourseCard";
-import PaginationControl from "../components/PaginationControl";
 
 function Profile() {
   const { user } = useUser();
-  const [enrolledCourses, setEnrolledCourses] = useState({});
-  const [publishedCourses, setPublishedCourses] = useState({});
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [publishedCourses, setPublishedCourses] = useState([]);
   const [loadingE, setLoadingE] = useState(true);
   const [loadingP, setLoadingP] = useState(true);
 
-  const [pageE, setPageE] = useState(1);
-  const [pageSizeE, setPageSizeE] = useState(8);
-  const [countE, setCountE] = useState(0);
-
-  const [pageP, setPageP] = useState(1);
-  const [pageSizeP, setPageSizeP] = useState(8);
-  const [countP, setCountP] = useState(0);
-
   const fetchEnrolledCourses = async () => {
     try {
-      const enrolledRes = await api.get(
-        `enrollments/?pageE=${pageE}&page_size=${pageSizeE}`
-      );
-      console.log(enrolledRes);
-
-      setCountE(enrolledRes.data.countE);
-      setEnrolledCourses(enrolledRes.data.results);
+      const res = await api.get("enrollments/");
+      setEnrolledCourses(res.data || []);
     } catch (err) {
-      console.log("Enrolled courses error:", err);
+      console.error("Enrolled courses error:", err);
     } finally {
       setLoadingE(false);
     }
@@ -37,32 +23,26 @@ function Profile() {
 
   const fetchPublishedCourses = async () => {
     try {
-      const publishedRes = await api.get(
-        `courses/?instructor=${user.id}&page=${pageP}&page_size=${pageSizeP}`
+      const res = await api.get(
+        `courses/?instructor=${user.id}&is_published=true`
       );
-      setPublishedCourses(publishedRes.data.results);
-      setCountP(publishedRes.data.count);
+      setPublishedCourses(res.data || []);
     } catch (err) {
-      console.log("Published courses error:", err);
+      console.error("Published courses error:", err);
     } finally {
       setLoadingP(false);
     }
   };
 
   useEffect(() => {
-    setLoadingE(true);
     fetchEnrolledCourses();
-  }, [pageE, pageSizeE]);
+  }, []);
 
   useEffect(() => {
     if (user.is_instructor) {
       fetchPublishedCourses();
-      setLoadingP(true);
     }
-  }, [pageP, pageSizeP]);
-
-  const total_pageE = Math.ceil(countE / pageSizeE);
-  const total_pageP = Math.ceil(countP / pageSizeP);
+  }, [user.is_instructor, user.id]);
 
   return (
     <div className="container mt-4">
@@ -85,17 +65,18 @@ function Profile() {
           </h4>
           <h6 className="text-muted">@{user.username}</h6>
         </div>
-        <hr />
       </div>
+
       <p className="mt-4">{user.bio}</p>
       <hr />
-      {user.is_instructor ? (
+
+      {user.is_instructor && (
         <>
           <h4 className="my-4">Published Courses</h4>
           <div className="row g-4">
             {publishedCourses.length > 0 ? (
               publishedCourses.map((course) => (
-                <div key={course.id} className="col-lg-3 col-md-6 col-sm-6">
+                <div key={course.id} className="col-lg-2 col-md-4 col-sm-6">
                   <CourseCard course={course} />
                 </div>
               ))
@@ -104,46 +85,20 @@ function Profile() {
             )}
           </div>
         </>
-      ) : (
-        <></>
       )}
-      {total_pageP > 1 && (
-        <PaginationControl
-          page={pageP}
-          setPage={setPageP}
-          count={countP}
-          pageSize={pageSizeP}
-        />
-      )}
-      {user.is_instructor && enrolledCourses.length == 0 ? (
-        <></>
-      ) : (
-        <>
-          <h4 className="my-4">Enrolled Courses</h4>
-          <div className="row g-4">
-            {enrolledCourses.length > 0 ? (
-              enrolledCourses.map((courses) => (
-                <div
-                  key={courses.course.id}
-                  className="col-lg-3 col-md-6 col-sm-6"
-                >
-                  <CourseCard course={courses.course} />
-                </div>
-              ))
-            ) : (
-              <p>No enrolled courses yet.</p>
-            )}
-          </div>
-          {total_pageE > 1 && (
-            <PaginationControl
-              page={pageE}
-              setPage={setPageE}
-              count={countE}
-              pageSize={pageSizeE}
-            />
-          )}
-        </>
-      )}
+
+      <h4 className="my-4">Enrolled Courses</h4>
+      <div className="row g-4">
+        {enrolledCourses.length > 0 ? (
+          enrolledCourses.map((enroll) => (
+            <div key={enroll.course.id} className="col-lg-2 col-md-4 col-sm-6">
+              <CourseCard course={enroll.course} />
+            </div>
+          ))
+        ) : (
+          <p>No enrolled courses yet.</p>
+        )}
+      </div>
     </div>
   );
 }

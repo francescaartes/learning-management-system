@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CourseDetailsTab from "../components/CreateCourse/CourseDetailsTab";
 import MediaPreviewTab from "../components/CreateCourse/MediaPreviewTab";
 import ArrayFieldTab from "../components/CreateCourse/ArrayFieldTab";
 import api from "../api/api";
 
 function CreateCourse() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
   const [formData, setFormData] = useState({
     title: "",
@@ -60,7 +62,7 @@ function CreateCourse() {
       const catRes = await api.get("categories/");
       setCategories(catRes.data);
     } catch (err) {
-      console.log("Fetching categories errer", err);
+      console.log("Fetching categories error", err);
     }
   };
 
@@ -68,14 +70,15 @@ function CreateCourse() {
     fetchCategories();
   }, []);
 
-  const handleSubmit = async () => {
-    const form = new FormData();
+  const saveDraft = async () => {
+    if (!formData.title.trim()) return;
 
+    const form = new FormData();
     form.append("title", formData.title);
     form.append("description", formData.description);
     form.append("language", formData.language);
     form.append("preview_url", formData.preview_url);
-    form.append("is_published", formData.is_published);
+    form.append("is_published", false);
     form.append("category", formData.category);
 
     if (formData.thumbnail) {
@@ -94,15 +97,15 @@ function CreateCourse() {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setCourseId(createRes.data.id);
-        console.log("Course created:", createRes.data);
+        console.log("Draft saved:", createRes.data);
       } else {
         const updateRes = await api.put(`courses/${courseId}/`, form, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        console.log("Course updated:", updateRes.data);
+        console.log("Draft updated:", updateRes.data);
       }
     } catch (err) {
-      console.error("Course save error:", err);
+      console.error("Draft save error:", err);
     }
   };
 
@@ -177,6 +180,55 @@ function CreateCourse() {
     }
   };
 
+  const isFormComplete = () => {
+    const requiredFields = [
+      "title",
+      "description",
+      "language",
+      "category",
+      "thumbnail",
+      "preview_url",
+      "learn",
+      "topics",
+      "inclusion",
+      "requirements",
+    ];
+
+    for (let field of requiredFields) {
+      const value = formData[field];
+
+      if (Array.isArray(value)) {
+        if (value.length === 0 || value.some((item) => item.trim() === "")) {
+          return false;
+        }
+      } else if (!value || value === "") {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleTabSwitch = async (index) => {
+    await saveDraft();
+    setActiveTab(index);
+  };
+
+  const handleContinue = async () => {
+    if (!isFormComplete()) {
+      alert("Please complete all fields before continuing to lessons.");
+      return;
+    }
+
+    await saveDraft();
+
+    if (courseId) {
+      navigate(`/create_lessons/${courseId}`);
+    } else {
+      alert("Error: Course ID missing. Try saving the form again.");
+    }
+  };
+
   return (
     <div className="container my-4">
       <h4 className="mb-3">Start a New Course</h4>
@@ -189,10 +241,7 @@ function CreateCourse() {
                 className={`mb-2 cursor-pointer ${
                   activeTab === idx ? "fw-bold text-primary" : ""
                 }`}
-                onClick={() => {
-                  setActiveTab(idx);
-                  handleSubmit();
-                }}
+                onClick={() => handleTabSwitch(idx)}
                 style={{ cursor: "pointer" }}
               >
                 {section}
@@ -208,7 +257,7 @@ function CreateCourse() {
             {activeTab > 0 && (
               <button
                 className="btn btn-outline-secondary"
-                onClick={() => setActiveTab(activeTab - 1)}
+                onClick={() => handleTabSwitch(activeTab - 1)}
               >
                 Back
               </button>
@@ -217,18 +266,12 @@ function CreateCourse() {
             {activeTab < sections.length - 1 ? (
               <button
                 className="btn btn-primary"
-                onClick={() => {
-                  setActiveTab(activeTab + 1);
-                  handleSubmit();
-                }}
+                onClick={() => handleTabSwitch(activeTab + 1)}
               >
                 Next
               </button>
             ) : (
-              <button
-                className="btn btn-primary"
-                onClick={() => handleSubmit()}
-              >
+              <button className="btn btn-primary" onClick={handleContinue}>
                 Continue
               </button>
             )}

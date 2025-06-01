@@ -59,18 +59,22 @@ class CourseList(generics.ListAPIView):
     serializer_class = serializers.CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.DjangoFilterBackend]
-    filterset_fields = ['category', 'instructor']
+    filterset_fields = ['category', 'instructor', 'is_published']
 
     def get_queryset(self):
-        return models.Course.objects.filter(is_published=True)
+        user = self.request.user
+        queryset = models.Course.objects.filter(is_published=True)
+
+        if user.is_authenticated:
+            return queryset | models.Course.objects.filter(instructor=user)
+        
+        return queryset
     
-class CourseCreate(generics.CreateAPIView):
-    serializer_class = serializers.CourseSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(instructor=self.request.user)
-
+    def list(self, request, *args, **kwargs):
+        if 'instructor' in request.query_params:
+            self.pagination_class = None
+        return super().list(request, *args, **kwargs)
+    
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -89,6 +93,13 @@ class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
             raise permissions.PermissionDenied("You do not have permission to edit this course.")
         serializer.save()
 
+class CourseCreate(generics.CreateAPIView):
+    serializer_class = serializers.CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(instructor=self.request.user)
+
 class LessonList(generics.ListCreateAPIView):
     serializer_class = serializers.LessonSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -105,6 +116,7 @@ class LessonList(generics.ListCreateAPIView):
 class EnrollmentList(generics.ListCreateAPIView):
     serializer_class = serializers.EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return models.Enrollment.objects.filter(student=self.request.user)
