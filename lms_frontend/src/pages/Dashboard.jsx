@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "../contexts/UserContext";
 import StudentDashboard from "./StudentDashboard";
 import InstructorDashboard from "./InstructorDashboard";
 
 function Dashboard() {
   const { user } = useUser();
-  const [dashboard, setDashboard] = useState("Student");
+  const [dashboard, setDashboard] = useState(
+    localStorage.getItem("dashboard") || "Student"
+  );
 
   const changeDashboard = () => {
-    setDashboard((prev) => (prev == "Student" ? "Instructor" : "Student"));
+    setDashboard((prev) => (prev === "Student" ? "Instructor" : "Student"));
   };
+
+  useEffect(() => {
+    localStorage.setItem("dashboard", dashboard);
+  }, [dashboard]);
 
   return (
     <div className="container my-4">

@@ -1,13 +1,28 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CourseDetailsTab from "../components/CreateCourse/CourseDetailsTab";
 import MediaPreviewTab from "../components/CreateCourse/MediaPreviewTab";
 import ArrayFieldTab from "../components/CreateCourse/ArrayFieldTab";
 import api from "../api/api";
 
 function CreateCourse() {
+  const { courseId: paramCourseId } = useParams();
   const navigate = useNavigate();
+
+  const sections = [
+    "Course Details",
+    "Media & Preview",
+    "Learning Outcomes",
+    "Detailed Topics",
+    "Included Materials",
+    "Prerequisites",
+  ];
+
   const [activeTab, setActiveTab] = useState(0);
+  const [courseId, setCourseId] = useState(paramCourseId || null);
+
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -21,25 +36,68 @@ function CreateCourse() {
     requirements: [""],
     is_published: false,
   });
-
   const [categories, setCategories] = useState([]);
-  const [courseId, setCourseId] = useState(null);
 
-  const sections = [
-    "Course Details",
-    "Media & Preview",
-    "Learning Outcomes",
-    "Detailed Topics",
-    "Included Materials",
-    "Prerequisites",
-  ];
+  const fetchCategories = async () => {
+    try {
+      const catRes = await api.get("categories/");
+      setCategories(catRes.data);
+    } catch (err) {
+      console.log("Fetching categories error", err);
+    }
+  };
+
+  const fetchCourse = async () => {
+    if (!courseId) return;
+    try {
+      const res = await api.get(`courses/${courseId}/`);
+      const data = res.data;
+
+      setFormData({
+        title: data.title || "",
+        description: data.description || "",
+        language: data.language || "",
+        category: data.category || "",
+        thumbnail: null,
+        preview_url: data.preview_url || "",
+        learn: data.learn.length ? data.learn : [""],
+        topics: data.topics.length ? data.topics : [""],
+        inclusion: data.inclusion.length ? data.inclusion : [""],
+        requirements: data.requirements.length ? data.requirements : [""],
+        is_published: data.is_published || false,
+      });
+
+      setThumbnailPreview(data.thumbnail || null);
+    } catch (error) {
+      console.error("Failed to fetch course for editing:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (courseId) {
+      fetchCourse();
+    }
+  }, [courseId]);
 
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "file" ? files[0] : value,
-    });
+    if (type === "file") {
+      const file = files[0];
+      setFormData({ ...formData, [name]: file });
+
+      if (file) {
+        const previewUrl = URL.createObjectURL(file);
+        setThumbnailPreview(previewUrl);
+      } else {
+        setThumbnailPreview(null);
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleArrayChange = (field, index, value) => {
@@ -56,19 +114,6 @@ function CreateCourse() {
       ...formData,
       [field]: formData[field].filter((_, i) => i !== index),
     });
-
-  const fetchCategories = async () => {
-    try {
-      const catRes = await api.get("categories/");
-      setCategories(catRes.data);
-    } catch (err) {
-      console.log("Fetching categories error", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
   const saveDraft = async () => {
     if (!formData.title.trim()) return;
@@ -117,6 +162,7 @@ function CreateCourse() {
             categories={categories}
             formData={formData}
             handleChange={handleChange}
+            thumbnailPreview={thumbnailPreview}
           />
         );
       case 1:
@@ -186,13 +232,13 @@ function CreateCourse() {
       "description",
       "language",
       "category",
-      "thumbnail",
-      "preview_url",
       "learn",
       "topics",
       "inclusion",
       "requirements",
     ];
+
+    if (!thumbnailPreview && !formData.thumbnail) return false;
 
     for (let field of requiredFields) {
       const value = formData[field];
@@ -225,20 +271,22 @@ function CreateCourse() {
     if (courseId) {
       navigate(`/create_lessons/${courseId}`);
     } else {
-      alert("Error: Course ID missing. Try saving the form again.");
+      alert("Error: Course ID missing. Please try again.");
     }
   };
 
   return (
     <div className="container my-4">
-      <h4 className="mb-3">Start a New Course</h4>
+      <h4 className="mb-3">
+        {courseId ? "Edit Course" : "Start a New Course"}
+      </h4>
       <div className="row">
         <div className="col-md-3 mb-3">
           <div className="card p-3">
             {sections.map((section, idx) => (
               <div
                 key={idx}
-                className={`mb-2 cursor-pointer ${
+                className={`mb-2 ${
                   activeTab === idx ? "fw-bold text-primary" : ""
                 }`}
                 onClick={() => handleTabSwitch(idx)}

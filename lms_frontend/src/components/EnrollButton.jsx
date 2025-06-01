@@ -39,7 +39,7 @@ function EnrollButton({ courseDetails }) {
       try {
         const res = await api.get("enrollments/");
 
-        const isEnrolled = res.data.results.some(
+        const isEnrolled = res.data.some(
           (enroll) =>
             enroll.course.id === courseDetails.id && enroll.student === user.id
         );

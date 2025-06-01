@@ -82,6 +82,14 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/edit_course/:courseId"
+            element={
+              <PrivateRoute>
+                <CreateCourse />
+              </PrivateRoute>
+            }
+          />
         </Switch>
         <div className="">
           <Footer />
