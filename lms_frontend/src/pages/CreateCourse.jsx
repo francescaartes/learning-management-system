@@ -120,11 +120,11 @@ function CreateCourse() {
 
     const form = new FormData();
     form.append("title", formData.title);
-    form.append("description", formData.description);
-    form.append("language", formData.language);
-    form.append("preview_url", formData.preview_url);
+    if (formData.description) form.append("description", formData.description);
+    if (formData.language) form.append("language", formData.language);
+    if (formData.preview_url) form.append("preview_url", formData.preview_url);
+    if (formData.category) form.append("category", formData.category);
     form.append("is_published", false);
-    form.append("category", formData.category);
 
     if (formData.thumbnail) {
       form.append("thumbnail", formData.thumbnail);
@@ -132,7 +132,8 @@ function CreateCourse() {
 
     ["learn", "topics", "inclusion", "requirements"].forEach((field) => {
       if (formData[field] && Array.isArray(formData[field])) {
-        form.append(field, JSON.stringify(formData[field]));
+        const clean = formData[field].filter((item) => item.trim() !== "");
+        form.append(field, JSON.stringify(clean));
       }
     });
 
@@ -144,13 +145,58 @@ function CreateCourse() {
         setCourseId(createRes.data.id);
         console.log("Draft saved:", createRes.data);
       } else {
-        const updateRes = await api.put(`courses/${courseId}/`, form, {
+        const updateRes = await api.patch(`courses/${courseId}/`, form, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         console.log("Draft updated:", updateRes.data);
       }
     } catch (err) {
-      console.error("Draft save error:", err);
+      console.error("Draft save error:", err.response?.data || err);
+    }
+  };
+
+  const publishCourse = async () => {
+    if (!isFormComplete()) {
+      alert("Please complete all fields before publishing.");
+      return;
+    }
+
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("description", formData.description);
+    form.append("language", formData.language);
+    form.append("preview_url", formData.preview_url);
+    form.append("is_published", true);
+    form.append("category", formData.category);
+
+    if (formData.thumbnail) {
+      form.append("thumbnail", formData.thumbnail);
+    }
+
+    ["learn", "topics", "inclusion", "requirements"].forEach((field) => {
+      form.append(
+        field,
+        JSON.stringify(formData[field].filter((item) => item.trim() !== ""))
+      );
+    });
+
+    try {
+      if (courseId == null) {
+        const res = await api.post("create_course/", form, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        setCourseId(res.data.id);
+        alert("Course published successfully!");
+      } else {
+        const res = await api.patch(`courses/${courseId}/`, form, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        alert("Course updated and published!");
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      console.error("Publishing error:", err.response?.data || err);
+      alert("There was an error publishing the course.");
     }
   };
 
@@ -260,21 +306,6 @@ function CreateCourse() {
     setActiveTab(index);
   };
 
-  const handleContinue = async () => {
-    if (!isFormComplete()) {
-      alert("Please complete all fields before continuing to lessons.");
-      return;
-    }
-
-    await saveDraft();
-
-    if (courseId) {
-      navigate(`/create_lessons/${courseId}`);
-    } else {
-      alert("Error: Course ID missing. Please try again.");
-    }
-  };
-
   return (
     <div className="container my-4">
       <h4 className="mb-3">
@@ -319,9 +350,24 @@ function CreateCourse() {
                 Next
               </button>
             ) : (
-              <button className="btn btn-primary" onClick={handleContinue}>
-                Continue
-              </button>
+              <>
+                <button
+                  className="btn btn-outline-primary"
+                  onClick={async () => {
+                    await saveDraft();
+                    navigate("/dashboard");
+                  }}
+                >
+                  Save as Draft
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={publishCourse}
+                  disabled={!isFormComplete()}
+                >
+                  Publish
+                </button>
+              </>
             )}
           </div>
         </div>

@@ -15,7 +15,6 @@ import PublicRoute from "./route/PublicRoute";
 import CourseLessons from "./pages/CourseLessons";
 import StartTeaching from "./pages/StartTeaching";
 import CreateCourse from "./pages/CreateCourse";
-import CreateCourseLesson from "./pages/CreateCourseLesson";
 
 function App() {
   return (
@@ -71,14 +70,6 @@ function App() {
             element={
               <PrivateRoute>
                 <CreateCourse />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/create_lessons/:courseId"
-            element={
-              <PrivateRoute>
-                <CreateCourseLesson />
               </PrivateRoute>
             }
           />

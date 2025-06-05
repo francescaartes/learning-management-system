@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, viewsets, views, response, status, exceptions
 from django_filters import rest_framework as filters
 from django.db.models import Count
+from .permissions import IsInstructorOrReadOnly
 from . import serializers
 from . import models
 
@@ -77,21 +78,16 @@ class CourseList(generics.ListAPIView):
     
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.CourseSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsInstructorOrReadOnly]
 
     def get_queryset(self):
         user = self.request.user
-        queryset = models.Course.objects.filter(is_published=True) 
+        queryset = models.Course.objects.filter(is_published=True)
         
         if user.is_authenticated:
             return queryset | models.Course.objects.filter(instructor=user)
         
         return queryset
-    
-    def perform_update(self, serializer):
-        if self.request.user != serializer.instance.instructor:
-            raise permissions.PermissionDenied("You do not have permission to edit this course.")
-        serializer.save()
 
 class CourseCreate(generics.CreateAPIView):
     serializer_class = serializers.CourseSerializer
@@ -102,7 +98,8 @@ class CourseCreate(generics.CreateAPIView):
 
 class LessonList(generics.ListCreateAPIView):
     serializer_class = serializers.LessonSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsInstructorOrReadOnly]
+    pagination_class = None
 
     def get_queryset(self):
         course_id = self.kwargs['pk']
@@ -110,16 +107,24 @@ class LessonList(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         course_id = self.kwargs['pk']
-        course = models.Course.objects.get(id=course_id, instructor=self.request.user)
+        course = models.Course.objects.get(id=course_id)
+        if course.instructor != self.request.user:
+            raise permissions.PermissionDenied("You do not have permission to add lessons to this course.")
         serializer.save(course=course)
-    
+
+class LessonDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Lesson.objects.all()
+    serializer_class = serializers.LessonSerializer
+    permission_classes = [IsInstructorOrReadOnly]
+    pagination_class = None
+
 class EnrollmentList(generics.ListCreateAPIView):
     serializer_class = serializers.EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     def get_queryset(self):
-        return models.Enrollment.objects.filter(student=self.request.user)
+        return models.Enrollment.objects.filter(student=self.request.user, course__is_published=True)
     
     def perform_create(self, serializer):
         user = self.request.user

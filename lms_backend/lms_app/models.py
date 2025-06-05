@@ -89,7 +89,7 @@ class Lesson(models.Model):
 
 class Enrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, limit_choices_to={'is_published': True}, related_name='enrollments')
     enrolled_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:

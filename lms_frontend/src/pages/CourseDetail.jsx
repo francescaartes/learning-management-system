@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import EnrollButton from "../components/EnrollButton";
 import StudentReviews from "../components/StudentReviews";
+import Modal from "../components/Modal";
 import api from "../api/api";
 
 function CourseDetail() {
@@ -12,7 +13,10 @@ function CourseDetail() {
 
   const [course, setCourse] = useState({});
   const [loading, setLoading] = useState(true);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showUnpublishModal, setShowUnpublishModal] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
   const fetchCourse = async () => {
     try {
@@ -28,14 +32,10 @@ function CourseDetail() {
   const handleUnpublish = async () => {
     try {
       await api.patch(`courses/${course.id}/`, { is_published: false });
-      navigate(`/edit-course/${course.id}`);
+      navigate("/dashboard");
     } catch (err) {
       console.error("Unpublish failed:", err);
     }
-  };
-
-  const handleEdit = () => {
-    navigate(`/edit_course/${course.id}`);
   };
 
   const handleDelete = async () => {
@@ -45,6 +45,15 @@ function CourseDetail() {
       navigate("/dashboard");
     } catch (err) {
       console.error("Delete failed:", err);
+    }
+  };
+
+  const handlePublish = async () => {
+    try {
+      await api.patch(`courses/${course.id}/`, { is_published: true });
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Publish failed:", err);
     }
   };
 
@@ -69,28 +78,44 @@ function CourseDetail() {
                 <EnrollButton courseDetails={course} />
                 {user?.id === course.instructor && (
                   <div className="d-grid gap-2">
-                    <hr />
                     {course.is_published ? (
-                      <button
-                        onClick={handleUnpublish}
-                        className="btn btn-outline-warning"
-                      >
-                        Unpublish & Edit
-                      </button>
+                      <>
+                        <hr />
+                        <div className="d-flex">
+                          <hr />
+                          <button
+                            onClick={() => setShowUnpublishModal(true)}
+                            className="btn btn-outline-warning w-100"
+                          >
+                            Unpublish
+                          </button>
+                        </div>
+                      </>
                     ) : (
                       <>
-                        <button
-                          onClick={handleEdit}
-                          className="btn btn-outline-warning"
-                        >
-                          Edit Draft
-                        </button>
-                        <button
-                          onClick={() => setShowDeleteModal(true)}
-                          className="btn btn-outline-danger"
-                        >
-                          Delete Course
-                        </button>
+                        <hr />
+                        <div className="d-flex justify-content-around gap-2">
+                          <button
+                            onClick={() =>
+                              navigate(`/edit_course/${course.id}`)
+                            }
+                            className="btn btn-outline-warning w-100"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setShowDeleteModal(true)}
+                            className="btn btn-outline-danger w-100"
+                          >
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => setShowPublishModal(true)}
+                            className="btn btn-outline-success w-100"
+                          >
+                            Publish
+                          </button>
+                        </div>
                       </>
                     )}
                   </div>
@@ -185,49 +210,35 @@ function CourseDetail() {
         </div>
       </div>
 
-      {showDeleteModal && (
-        <div
-          className="modal fade show d-block"
-          tabIndex="-1"
-          role="dialog"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Delete</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowDeleteModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>
-                  Are you sure you want to permanently delete this course? This
-                  action cannot be undone.
-                </p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowDeleteModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={handleDelete}
-                >
-                  Delete Course
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Confirm Delete"
+        body="Are you sure you want to permanently delete this course? This action cannot be undone."
+        confirmText="Delete Course"
+        confirmClass="btn-danger"
+        onConfirm={handleDelete}
+      />
+
+      <Modal
+        show={showUnpublishModal}
+        onClose={() => setShowUnpublishModal(false)}
+        title="Unpublish Course"
+        body="Are you sure you want to unpublish this course? Students will no longer see it."
+        confirmText="Yes, Unpublish"
+        confirmClass="btn-warning"
+        onConfirm={handleUnpublish}
+      />
+
+      <Modal
+        show={showPublishModal}
+        onClose={() => setShowPublishModal(false)}
+        title="Publish Course"
+        body="Are you sure you want to publish this course? It will be visible to students."
+        confirmText="Yes, Publish"
+        confirmClass="btn-success"
+        onConfirm={handlePublish}
+      />
     </div>
   );
 }
