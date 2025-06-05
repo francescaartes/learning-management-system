@@ -66,17 +66,70 @@ class CourseSerializer(serializers.ModelSerializer):
                 value = data.get(field) or getattr(self.instance, field, None)
                 if not value:
                     raise serializers.ValidationError({field: f"{field} is required to publish the course."})
-
-            course = self.instance
-            if course and course.lessons.count() == 0:
-                raise serializers.ValidationError("You must add at least one lesson before publishing.")
         return data
 
-class LessonSerializer(serializers.ModelSerializer):
-    course = CourseSerializer(read_only=True)
+class AnnouncementSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Lesson
+        model = models.Announcement
         fields = '__all__'
+
+class ResourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Resource
+        fields = '__all__'
+
+class AssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Assignment
+        fields = '__all__'
+
+class QuizQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.QuizQuestion
+        fields = '__all__'
+
+class QuizSerializer(serializers.ModelSerializer):
+    questions = QuizQuestionSerializer(many=True)
+
+    class Meta:
+        model = models.Quiz
+        fields = '__all__'
+
+class PostSerializer(serializers.ModelSerializer):
+    announcement = AnnouncementSerializer()
+    resource = ResourceSerializer()
+    assignment = AssignmentSerializer()
+    quiz = QuizSerializer()
+
+    class Meta:
+        model = models.Post
+        fields = '__all__'
+
+    def create(self, validated_data):
+        type_ = validated_data['type']
+        post = models.Post.objects.create(
+            type=type_, 
+            title=validated_data['title'],
+            couse=validated_data['course'],
+            author=self.context['request'].user
+            )
+        
+        type_data = validated_data.get(type_, ())
+        if type_ =='announcemen':
+            models.Announcement.objects.create(post=post, **type_data)
+        elif type_ == 'resource':
+            models.Resource.objects.create(post=post, **type_data)
+        elif type_ == 'assignment':
+            models.Assignment.objects.create(post=post, **type_data)
+        elif type_ == 'quiz':
+            quiz_data = type_data
+            questions = quiz_data.pop('questions', [])
+            quiz = models.Quiz.objects.create(post=post, **quiz_data)
+            for q in questions:
+                models.QuizQuestion.objects.create(quiz=quiz, **q)
+
+        return post
+    
 
 class EnrollmentSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)

@@ -77,15 +77,51 @@ class Course(models.Model):
     def rating_count(self):
         return self.reviews.count()
 
-class Lesson(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lessons')
-    title = models.CharField(max_length=200)
-    content = models.TextField(blank=True)
-    video_url = models.URLField(blank=True)
-    order = models.PositiveIntegerField(default=0)
+class Post(models.Model):
+    POST_TYPES = [
+        ("announcement", "Announcement"),
+        ("resource", "Resource"),
+        ("assignment", "Assignment"),
+        ("quiz", "Quiz")
+    ]
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='posts')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'is_instructor': True})
+    type = models.CharField(max_length=20, choices=POST_TYPES)
+    title = models.CharField(max_length=255)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_on']
+        
 
     def __str__(self):
-        return f'{self.title} - {self.course}'
+        return f'{self.title} - {self.type}'
+    
+class Announcement(models.Model):
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='announcement')
+    message = models.TextField()
+
+class Resource(models.Model):
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='resource')
+    file = models.FileField(upload_to='resources/')
+    description = models.TextField(blank=True)
+
+class Assignment(models.Model):
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='assignment')
+    instructions = models.TextField()
+    due_date = models.DateTimeField()
+    max_score = models.PositiveIntegerField(default=100)
+
+class Quiz(models.Model):
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='quiz')
+    instructions = models.TextField()
+    due_date = models.DateTimeField()
+
+class QuizQuestion(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.TextField()
+    options = models.JSONField() 
+    correct_answer = models.CharField(max_length=255)
 
 class Enrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')

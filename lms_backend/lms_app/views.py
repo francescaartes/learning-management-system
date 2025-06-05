@@ -96,27 +96,40 @@ class CourseCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(instructor=self.request.user)
 
-class LessonList(generics.ListCreateAPIView):
-    serializer_class = serializers.LessonSerializer
-    permission_classes = [IsInstructorOrReadOnly]
-    pagination_class = None
+class PostView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        course_id = self.kwargs['pk']
-        return models.Lesson.objects.filter(course=course_id).order_by('order')
+    def get(self, request):
+        posts = models.Post.objects.all().order_by('-created_on')
+        serializer = serializers.PostSerializer(posts, many=True)
+        return response.Response(serializer.data)
     
-    def perform_create(self, serializer):
-        course_id = self.kwargs['pk']
-        course = models.Course.objects.get(id=course_id)
-        if course.instructor != self.request.user:
-            raise permissions.PermissionDenied("You do not have permission to add lessons to this course.")
-        serializer.save(course=course)
+    def post(self, request):
+        serializer = serializers.PostSerializer(data=request.data)
+        if serializer.is_valid():
+            post = serializer.save(author=request.user)
+            return response.Response(serializers.PostSerializer(post).data, status=status.HTTP_201_CREATED)
+        return response.Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class LessonDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = models.Lesson.objects.all()
-    serializer_class = serializers.LessonSerializer
-    permission_classes = [IsInstructorOrReadOnly]
-    pagination_class = None
+class AnnouncementViewSet(viewsets.ModelViewSet):
+    queryset = models.Announcement.objects.all()
+    serializer_class = serializers.AnnouncementSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class ResourceViewSset(viewsets.ModelViewSet):
+    queryset = models.Resource.objects.all()
+    serializer_class = serializers.ResourceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class AssignmentViewSset(viewsets.ModelViewSet):
+    queryset = models.Assignment.objects.all()
+    serializer_class = serializers.AssignmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class QuizViewSset(viewsets.ModelViewSet):
+    queryset = models.Quiz.objects.all()
+    serializer_class = serializers.QuizSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 class EnrollmentList(generics.ListCreateAPIView):
     serializer_class = serializers.EnrollmentSerializer

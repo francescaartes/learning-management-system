@@ -12,9 +12,9 @@ import Profile from "./pages/Profile";
 import { UserProvider } from "./contexts/UserContext";
 import PrivateRoute from "./route/PrivateRoute";
 import PublicRoute from "./route/PublicRoute";
-import CourseLessons from "./pages/CourseLessons";
 import StartTeaching from "./pages/StartTeaching";
 import CreateCourse from "./pages/CreateCourse";
+import CoursePage from "./pages/CoursePage";
 
 function App() {
   return (
@@ -28,8 +28,12 @@ function App() {
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:courseId" element={<CourseDetail />} />
           <Route
-            path="/courses/:courseId/lessons"
-            element={<CourseLessons />}
+            path="/course/:courseId"
+            element={
+              <PrivateRoute>
+                <CoursePage />
+              </PrivateRoute>
+            }
           />
           <Route path="/instructors" element={<Instructors />} />
           <Route

@@ -59,7 +59,7 @@ function EnrollButton({ courseDetails }) {
       {user?.id === courseDetails.instructor || status ? (
         <button
           className="btn btn-primary w-100"
-          onClick={() => navigate(`/courses/${courseDetails.id}/lessons`)}
+          onClick={() => navigate(`/course/${courseDetails.id}`)}
         >
           Go to Course
         </button>
