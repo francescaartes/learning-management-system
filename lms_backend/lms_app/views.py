@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, viewsets, views, response, status, exceptions
 from django_filters import rest_framework as filters
-from django.db.models import Count
+from django.db.models import Count, Q
 from .permissions import IsInstructorOrReadOnly
 from . import serializers
 from . import models
@@ -42,7 +42,7 @@ class CourseCategoryList(generics.ListAPIView):
     def get_queryset(self):
         queryset = models.CourseCategory.objects.all()
         if self.request.query_params.get('used'):
-            queryset = models.CourseCategory.objects.annotate(course_count=Count('courses'))
+            queryset = models.CourseCategory.objects.annotate(course_count=Count('courses', Q(courses__is_published=True)))
             type = self.request.query_params.get('used')
 
             if type == 'true':
@@ -79,6 +79,7 @@ class CourseList(generics.ListAPIView):
 class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.CourseSerializer
     permission_classes = [IsInstructorOrReadOnly]
+    pagination_class = None
 
     def get_queryset(self):
         user = self.request.user
@@ -100,33 +101,39 @@ class PostView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        posts = models.Post.objects.all().order_by('-created_on')
+        course_id = self.request.query_params.get('course')
+        user = self.request.user
+        
+        if not models.Course.objects.filter(instructor=user.id, id=course_id).exists() and not models.Enrollment.objects.filter(student=user.id,course=course_id).exists():
+             raise exceptions.ValidationError("You have no access in this course.")
+
+        posts = models.Post.objects.filter(course=course_id).order_by('-created_on')
         serializer = serializers.PostSerializer(posts, many=True)
         return response.Response(serializer.data)
     
     def post(self, request):
-        serializer = serializers.PostSerializer(data=request.data)
+        serializer = serializers.PostSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            post = serializer.save(author=request.user)
+            post = serializer.save()
             return response.Response(serializers.PostSerializer(post).data, status=status.HTTP_201_CREATED)
-        return response.Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AnnouncementViewSet(viewsets.ModelViewSet):
     queryset = models.Announcement.objects.all()
     serializer_class = serializers.AnnouncementSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class ResourceViewSset(viewsets.ModelViewSet):
+class ResourceViewSet(viewsets.ModelViewSet):
     queryset = models.Resource.objects.all()
     serializer_class = serializers.ResourceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class AssignmentViewSset(viewsets.ModelViewSet):
+class AssignmentViewSet(viewsets.ModelViewSet):
     queryset = models.Assignment.objects.all()
     serializer_class = serializers.AssignmentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class QuizViewSset(viewsets.ModelViewSet):
+class QuizViewSet(viewsets.ModelViewSet):
     queryset = models.Quiz.objects.all()
     serializer_class = serializers.QuizSerializer
     permission_classes = [permissions.IsAuthenticated]

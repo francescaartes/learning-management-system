@@ -53,6 +53,7 @@ class CourseSerializer(serializers.ModelSerializer):
     rating_count = serializers.IntegerField(read_only=True)
     instructor_name = serializers.CharField(source='instructor.get_full_name', read_only=True)
     instructor = serializers.PrimaryKeyRelatedField(read_only=True)
+    enrollment_count = serializers.IntegerField(read_only=True)
     class Meta:
         model = models.Course
         fields = '__all__'
@@ -71,64 +72,88 @@ class CourseSerializer(serializers.ModelSerializer):
 class AnnouncementSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Announcement
-        fields = '__all__'
+        exclude = ['post']
 
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Resource
-        fields = '__all__'
+        exclude = ['post']
 
 class AssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Assignment
-        fields = '__all__'
+        exclude = ['post']
 
 class QuizQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.QuizQuestion
-        fields = '__all__'
+        exclude = ['quiz']
 
 class QuizSerializer(serializers.ModelSerializer):
     questions = QuizQuestionSerializer(many=True)
 
     class Meta:
         model = models.Quiz
-        fields = '__all__'
+        exclude = ['post']
 
 class PostSerializer(serializers.ModelSerializer):
-    announcement = AnnouncementSerializer()
-    resource = ResourceSerializer()
-    assignment = AssignmentSerializer()
-    quiz = QuizSerializer()
+    announcement = AnnouncementSerializer(required=False)
+    resource = ResourceSerializer(required=False)
+    assignment = AssignmentSerializer(required=False)
+    quiz = QuizSerializer(required=False)
 
     class Meta:
         model = models.Post
         fields = '__all__'
+        read_only_fields = ['author']
 
     def create(self, validated_data):
         type_ = validated_data['type']
-        post = models.Post.objects.create(
-            type=type_, 
-            title=validated_data['title'],
-            couse=validated_data['course'],
-            author=self.context['request'].user
-            )
+        course = validated_data['course']
+        title = validated_data['title']
+        author = self.context['request'].user
         
-        type_data = validated_data.get(type_, ())
-        if type_ =='announcemen':
+        type_data = validated_data.pop(type_, {})
+        post = models.Post.objects.create(
+            type=type_,
+            course=course,
+            title=title,
+            author=author
+        )
+        
+        if type_ == 'announcement':
             models.Announcement.objects.create(post=post, **type_data)
         elif type_ == 'resource':
             models.Resource.objects.create(post=post, **type_data)
         elif type_ == 'assignment':
             models.Assignment.objects.create(post=post, **type_data)
         elif type_ == 'quiz':
-            quiz_data = type_data
-            questions = quiz_data.pop('questions', [])
-            quiz = models.Quiz.objects.create(post=post, **quiz_data)
+            questions = type_data.pop('questions', [])
+            quiz = models.Quiz.objects.create(post=post, **type_data)
             for q in questions:
                 models.QuizQuestion.objects.create(quiz=quiz, **q)
 
         return post
+    
+    def validate(self, attrs):
+        request = self.context['request']
+        user = request.user
+        course = attrs.get('course')
+        post_type = attrs.get('type')
+
+        if not getattr(user, 'is_instructor', False):
+            raise serializers.ValidationError("Only instructors can create posts.")
+        
+        if course and course.instructor != user:
+            raise serializers.ValidationError("You can only post in courses you own.")
+        
+        if post_type not in ['announcement', 'resource', 'assignment', 'quiz']:
+            raise serializers.ValidationError({"type": "Invalid post type."})
+        
+        if post_type and not attrs.get(post_type):
+            raise serializers.ValidationError({post_type: "This field is required."})
+
+        return attrs
     
 
 class EnrollmentSerializer(serializers.ModelSerializer):

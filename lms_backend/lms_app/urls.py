@@ -5,9 +5,9 @@ from . import views
 router = DefaultRouter()
 router.register(r'users', views.UserViewSet, basename='users')
 router.register(r'announcements', views.AnnouncementViewSet, basename='announcements')
-router.register(r'resources', views.ResourceViewSset, basename='resources')
-router.register(r'assignments', views.AssignmentViewSset, basename='assignments')
-router.register(r'quizzes', views.QuizViewSset, basename='quizzes')
+router.register(r'resources', views.ResourceViewSet, basename='resources')
+router.register(r'assignments', views.AssignmentViewSet, basename='assignments')
+router.register(r'quizzes', views.QuizViewSet, basename='quizzes')
 
 urlpatterns = [
     path('', include(router.urls)),

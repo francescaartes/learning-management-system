@@ -76,6 +76,10 @@ class Course(models.Model):
     @property
     def rating_count(self):
         return self.reviews.count()
+    
+    @property
+    def enrollment_count(self):
+        return self.enrollments.count()
 
 class Post(models.Model):
     POST_TYPES = [
@@ -93,27 +97,33 @@ class Post(models.Model):
     class Meta:
         ordering = ['-created_on']
         
-
     def __str__(self):
         return f'{self.title} - {self.type}'
     
 class Announcement(models.Model):
-    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='announcement')
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='announcement', limit_choices_to={'type': 'announcement'})
     message = models.TextField()
 
 class Resource(models.Model):
-    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='resource')
-    file = models.FileField(upload_to='resources/')
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='resource', limit_choices_to={'type': 'resource'})
+    file = models.FileField(upload_to='resources/', blank=True)
+    link = models.URLField(blank=True)
     description = models.TextField(blank=True)
 
 class Assignment(models.Model):
-    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='assignment')
+    SUBMISSION_TYPES = [
+        ("file", "File Upload"),
+        ("text", "Text Area"),
+        ("link", "URL")
+    ]
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='assignment', limit_choices_to={'type': 'assignment'})
     instructions = models.TextField()
     due_date = models.DateTimeField()
     max_score = models.PositiveIntegerField(default=100)
+    submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPES, default='file')
 
 class Quiz(models.Model):
-    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='quiz')
+    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='quiz', limit_choices_to={'type': 'quiz'})
     instructions = models.TextField()
     due_date = models.DateTimeField()
 
