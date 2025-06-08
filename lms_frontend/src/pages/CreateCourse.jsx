@@ -4,8 +4,11 @@ import CourseDetailsTab from "../components/CreateCourse/CourseDetailsTab";
 import MediaPreviewTab from "../components/CreateCourse/MediaPreviewTab";
 import ArrayFieldTab from "../components/CreateCourse/ArrayFieldTab";
 import api from "../api/api";
+import { useUser } from "../contexts/UserContext";
+import Modal from "../components/Modal";
 
 function CreateCourse() {
+  const { user } = useUser();
   const { courseId: paramCourseId } = useParams();
   const navigate = useNavigate();
 
@@ -20,7 +23,8 @@ function CreateCourse() {
 
   const [activeTab, setActiveTab] = useState(0);
   const [courseId, setCourseId] = useState(paramCourseId || null);
-
+  const [loading, setLoading] = useState(true);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -39,19 +43,29 @@ function CreateCourse() {
   const [categories, setCategories] = useState([]);
 
   const fetchCategories = async () => {
+    setLoading(true);
     try {
       const catRes = await api.get("categories/");
       setCategories(catRes.data);
     } catch (err) {
       console.log("Fetching categories error", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchCourse = async () => {
+    setLoading(true);
+
     if (!courseId) return;
+
     try {
       const res = await api.get(`courses/${courseId}/`);
       const data = res.data;
+
+      if (user.id !== data.instructor) {
+        navigate("/dashboard");
+      }
 
       setFormData({
         title: data.title || "",
@@ -70,6 +84,8 @@ function CreateCourse() {
       setThumbnailPreview(data.thumbnail || null);
     } catch (error) {
       console.error("Failed to fetch course for editing:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,6 +101,7 @@ function CreateCourse() {
 
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
+
     if (type === "file") {
       const file = files[0];
       setFormData({ ...formData, [name]: file });
@@ -186,17 +203,14 @@ function CreateCourse() {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setCourseId(res.data.id);
-        alert("Course published successfully!");
       } else {
         const res = await api.patch(`courses/${courseId}/`, form, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        alert("Course updated and published!");
         navigate("/dashboard");
       }
     } catch (err) {
       console.error("Publishing error:", err.response?.data || err);
-      alert("There was an error publishing the course.");
     }
   };
 
@@ -306,6 +320,10 @@ function CreateCourse() {
     setActiveTab(index);
   };
 
+  if (loading) {
+    return <div></div>;
+  }
+
   return (
     <div className="container my-4">
       <h4 className="mb-3">
@@ -362,7 +380,7 @@ function CreateCourse() {
                 </button>
                 <button
                   className="btn btn-primary"
-                  onClick={publishCourse}
+                  onClick={() => setShowPublishModal(true)}
                   disabled={!isFormComplete()}
                 >
                   Publish
@@ -372,6 +390,16 @@ function CreateCourse() {
           </div>
         </div>
       </div>
+
+      <Modal
+        show={showPublishModal}
+        onClose={() => setShowPublishModal(false)}
+        title="Publish Course"
+        body="Are you sure you want to publish this course? It will be visible to students."
+        confirmText="Yes, Publish"
+        confirmClass="btn-success"
+        onConfirm={() => publishCourse()}
+      />
     </div>
   );
 }

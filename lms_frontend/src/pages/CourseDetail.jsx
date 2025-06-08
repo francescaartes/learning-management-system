@@ -64,20 +64,28 @@ function CourseDetail() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="container my-5">
+    <div className="container my-4">
       <div className="row g-4">
         <div className="col-lg-4">
           <div className="position-sticky" style={{ top: "5rem" }}>
             <div className="card shadow-sm">
-              {course.previewUrl && (
-                <video controls className="card-img-top rounded-top">
-                  <source src={course.previewUrl} type="video/mp4" />
-                </video>
-              )}
-              <div className="card-body d-grid gap-3">
+              <div>
+                {course.previewUrl ? (
+                  <video controls className="card-img-top">
+                    <source src={course.previewUrl} type="video/mp4" />
+                  </video>
+                ) : (
+                  <img
+                    src={course.thumbnail}
+                    alt={course.title}
+                    className="card-img-top"
+                  />
+                )}
+              </div>
+              <div className="card-body d-grid">
                 <EnrollButton courseDetails={course} />
                 {user?.id === course.instructor && (
-                  <div className="d-grid gap-2">
+                  <div className="d-grid">
                     {course.is_published ? (
                       <>
                         <hr />
@@ -122,7 +130,6 @@ function CourseDetail() {
                 )}
               </div>
             </div>
-
             <div className="card mt-3 p-3 text-muted small shadow-sm">
               <div>
                 <strong>Instructor:</strong> {course.instructor_name}
@@ -133,6 +140,10 @@ function CourseDetail() {
               </div>
               <div>
                 <strong>Language:</strong> {course.language}
+              </div>
+              <div>
+                <strong>Enrolled: </strong>
+                {course.enrollment_count || 0} Students
               </div>
               <div>
                 <strong>Rating:</strong>{" "}
