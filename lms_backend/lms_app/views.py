@@ -97,7 +97,7 @@ class CourseCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(instructor=self.request.user)
 
-class PostView(views.APIView):
+class PostListView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -117,6 +117,37 @@ class PostView(views.APIView):
             post = serializer.save()
             return response.Response(serializers.PostSerializer(post).data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class PostDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Post.objects.all()
+    serializer_class = serializers.PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        post = super().get_object()
+        user = self.request.user
+        course_id = post.course.id
+
+        if not models.Course.objects.filter(instructor=user.id, id=course_id).exists() and not models.Enrollment.objects.filter(student=user.id, course=course_id).exists():
+            raise exceptions.PermissionDenied("You have no access to this post.")
+        
+        return post
+    
+    def perform_destroy(self, instance):
+        user = self.request.user
+
+        if instance.author != user:
+            raise exceptions.PermissionDenied("You are not allowed to delete this post.")
+
+        instance.delete()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+
+        if serializer.instance.author != user:
+            raise exceptions.PermissionDenied("You are not allowed to edit this post.")
+        
+        serializer.save()
 
 class AnnouncementViewSet(viewsets.ModelViewSet):
     queryset = models.Announcement.objects.all()

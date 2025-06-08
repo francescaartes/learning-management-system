@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/api";
 import CreatePost from "../components/CreatePost";
+import { useUser } from "../contexts/UserContext";
 
 function CoursePage() {
+  const { user } = useUser();
   const { courseId } = useParams();
   const [course, setCourse] = useState({});
   const [posts, setPosts] = useState([]);
@@ -31,12 +33,21 @@ function CoursePage() {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`posts/${id}/`);
+      fetchPosts();
+    } catch (err) {
+      console.log("Delete post error", err);
+    }
+  };
+
   useEffect(() => {
     fetchCourse();
     fetchPosts();
   }, [courseId]);
 
-  const isInstructor = course?.instructor?.id === api.getCurrentUserId?.();
+  const isInstructor = course.instructor === user.id;
 
   const typeColors = {
     announcement: "primary",
@@ -108,28 +119,60 @@ function CoursePage() {
                     className="card mb-3 shadow-sm"
                     style={{ maxHeight: "30rem" }}
                   >
+                    <div className="d-flex justify-content-between align-items-center card-body pb-0">
+                      <span
+                        className={`badge bg-${
+                          typeColors[post.type] || "secondary"
+                        }`}
+                      >
+                        {post.type.toUpperCase()}
+                      </span>
+                      <span className="d-flex gap-3 align-items-center">
+                        <small className="text-muted">
+                          {new Date(post.created_on).toLocaleString("en-US", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </small>
+                        {isInstructor && (
+                          <div className="dropdown">
+                            <button
+                              className="btn btn-outline-secondary px-1 py-0 dropdown-toggle no-caret"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                            >
+                              <i className="bi bi-three-dots p-0 m-0"></i>
+                            </button>
+                            <ul className="dropdown-menu dropdown-menu-end">
+                              <li>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() => handleEdit(post.id)}
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  className="dropdown-item text-danger"
+                                  onClick={() => handleDelete(post.id)}
+                                >
+                                  Delete
+                                </button>
+                              </li>
+                            </ul>
+                          </div>
+                        )}
+                      </span>
+                    </div>
                     <a href={``} className="text-decoration-none text-black">
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between">
-                          <span
-                            className={`badge bg-${
-                              typeColors[post.type] || "secondary"
-                            }`}
-                          >
-                            {post.type.toUpperCase()}
-                          </span>
-                          <small className="text-muted">
-                            {new Date(post.created_on).toLocaleString("en-US", {
-                              weekday: "long",
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            })}
-                          </small>
-                        </div>
+                      <div className="card-body pt-0">
                         <div className="d-flex flex-column gap-2">
                           <h5 className="mt-2 mb-0">{post.title}</h5>
                           {post.type === "announcement" && (
