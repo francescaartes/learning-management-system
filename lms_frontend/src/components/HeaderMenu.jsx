@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import Brand from "./Brand";
-import "../App.css";
 
 function HeaderMenu({ navItems, userItems }) {
   const { user } = useUser();

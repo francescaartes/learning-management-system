@@ -12,3 +12,7 @@
     background-color: rgba(0, 0, 0, 0.05); 
     border-radius: 0.25rem;
   }
+
+  .no-caret::after {
+  display: none !important;
+}

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import CourseCarousel from "../components/CourseCarousel";
 import api from "../api/api";
 

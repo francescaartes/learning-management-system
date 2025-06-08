@@ -3,7 +3,6 @@ import { useUser } from "../contexts/UserContext";
 import ProfileDropdown from "../components/ProfileDropdown";
 import HeaderMenu from "./HeaderMenu";
 import Brand from "./Brand";
-import "../App.css";
 
 function Header() {
   const { user, setUser } = useUser();
