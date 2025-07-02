@@ -5,7 +5,7 @@ import QuizForm from "./CreatePost/QuizForm";
 import AssignmentForm from "./CreatePost/AssignmentForm";
 import api from "../api/api";
 
-function CreatePost({ courseId }) {
+function CreatePost({ courseId, onPostCreated, onCancel }) {
   const [selectedType, setSelectedType] = useState("announcement");
   const [newPost, setNewPost] = useState({
     title: "",
@@ -22,7 +22,7 @@ function CreatePost({ courseId }) {
 
   const [announcementData, setAnnouncementData] = useState({ message: "" });
   const [resourceData, setResourceData] = useState({
-    description: "",
+    content: "",
   });
   const [assignmentData, setAssignmentData] = useState({
     instructions: "",
@@ -79,9 +79,16 @@ function CreatePost({ courseId }) {
       await api.post(`posts/`, postData);
 
       console.log("Post created!");
+      if (onPostCreated) {
+        onPostCreated();
+      }
+      if (onCancel) {
+        onCancel();
+      }
+
       setNewPost({ title: "", type: "announcement", course: courseId });
       setAnnouncementData({ message: "" });
-      setResourceData({ description: "" });
+      setResourceData({ content: "" });
       setAssignmentData({
         instructions: "",
         due_date: "",
@@ -98,7 +105,6 @@ function CreatePost({ courseId }) {
       console.error(JSON.stringify(err.response?.data, null, 2));
     } finally {
       setCreating(false);
-      window.location.reload();
     }
   };
 

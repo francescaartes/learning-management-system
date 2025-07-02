@@ -3,7 +3,7 @@ function Resource({ post, preview }) {
     <div
       className="resource-content"
       dangerouslySetInnerHTML={{
-        __html: post.resource.description,
+        __html: post.resource.content,
       }}
     />
   );
