@@ -1,0 +1,42 @@
+.tiptap-container {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.tiptap-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  border-bottom: 1px solid #ddd;
+  padding: 0.5rem;
+  background: #f9f9f9;
+}
+
+.tiptap-toolbar button {
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+
+.tiptap-toolbar button.is-active {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.tiptap-container .ProseMirror {
+  padding: 0.75rem;
+  min-height: 300px;
+  outline: none;
+}
+
+.tiptap-container .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.5rem 0;
+}

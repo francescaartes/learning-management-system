@@ -1,13 +1,11 @@
 import React from "react";
-import "react-quill-new/dist/quill.snow.css";
-import ReactQuill from "react-quill-new";
+import TiptapEditor from "../TipTapEditor";
 
 function AnnouncementForm({ data, setData }) {
   return (
     <div className="" style={{ minHeight: "10rem" }}>
-      <ReactQuill
-        theme="snow"
-        value={data.message}
+      <TiptapEditor
+        content={data.message}
         onChange={(content) => setData({ ...data, message: content })}
         placeholder="Write your announcement message here..."
       />
