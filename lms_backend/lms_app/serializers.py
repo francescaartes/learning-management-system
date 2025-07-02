@@ -155,7 +155,6 @@ class PostSerializer(serializers.ModelSerializer):
 
         return attrs
     
-
 class EnrollmentSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
     course_id = serializers.PrimaryKeyRelatedField(queryset=models.Course.objects.all(), write_only=True, source='course')

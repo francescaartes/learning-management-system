@@ -4,8 +4,8 @@ function ResourceForm({ data, setData }) {
   return (
     <div className="d-flex flex-column gap-2">
       <TipTapEditor
-        content={data.description}
-        onChange={(html) => setData({ ...data, description: html })}
+        content={data.content}
+        onChange={(html) => setData({ ...data, content: html })}
       />
     </div>
   );

@@ -22,8 +22,6 @@ function CreatePost({ courseId }) {
 
   const [announcementData, setAnnouncementData] = useState({ message: "" });
   const [resourceData, setResourceData] = useState({
-    file: "",
-    link: "",
     description: "",
   });
   const [assignmentData, setAssignmentData] = useState({
@@ -44,65 +42,63 @@ function CreatePost({ courseId }) {
     setCreating(true);
 
     try {
-      if (selectedType === "resource") {
-        const formData = new FormData();
-        formData.append("title", newPost.title);
-        formData.append("type", selectedType);
-        formData.append("course", courseId);
+      const postData = {
+        title: newPost.title,
+        type: selectedType,
+        course: courseId,
+        ...(selectedType === "announcement" && {
+          announcement: announcementData,
+        }),
+        ...(selectedType === "resource" && {
+          resource: {
+            content: resourceData.content,
+          },
+        }),
+        ...(selectedType === "assignment" && {
+          assignment: {
+            instructions: assignmentData.instructions,
+            due_date: assignmentData.due_date,
+            max_score: Number(assignmentData.max_score),
+            submission_type: assignmentData.submission_type,
+          },
+        }),
+        ...(selectedType === "quiz" && {
+          quiz: {
+            instructions: quizData.instructions,
+            due_date: quizData.due_date,
+            questions: quizData.questions.map((q) => ({
+              question_text: q.question_text,
+              options: q.options,
+              correct_answer: q.correct_answer,
+            })),
+          },
+        }),
+      };
 
-        if (resourceData.file) {
-          formData.append("resource.file", resourceData.file);
-        }
-        if (resourceData.link) {
-          formData.append("resource.link", resourceData.link);
-        }
-        if (resourceData.description) {
-          formData.append("resource.description", resourceData.description);
-        }
-
-        console.log("FORMDATA:", [...formData.entries()]);
-
-        await api.post(`posts/`, formData);
-      } else {
-        const postData = {
-          title: newPost.title,
-          type: selectedType,
-          course: courseId,
-          ...(selectedType === "announcement" && {
-            announcement: announcementData,
-          }),
-          ...(selectedType === "assignment" && {
-            assignment: {
-              instructions: assignmentData.instructions,
-              due_date: assignmentData.due_date,
-              max_score: Number(assignmentData.max_score),
-              submission_type: assignmentData.submission_type,
-            },
-          }),
-          ...(selectedType === "quiz" && {
-            quiz: {
-              instructions: quizData.instructions,
-              due_date: quizData.due_date,
-              questions: quizData.questions.map((q) => ({
-                question_text: q.question_text,
-                options: q.options,
-                correct_answer: q.correct_answer,
-              })),
-            },
-          }),
-        };
-
-        console.log("POST DATA:", JSON.stringify(postData, null, 2));
-        await api.post(`posts/`, postData);
-      }
+      console.log("POST DATA:", JSON.stringify(postData, null, 2));
+      await api.post(`posts/`, postData);
 
       console.log("Post created!");
       setNewPost({ title: "", type: "announcement", course: courseId });
+      setAnnouncementData({ message: "" });
+      setResourceData({ description: "" });
+      setAssignmentData({
+        instructions: "",
+        due_date: "",
+        max_score: 0,
+        submission_type: "",
+      });
+      setQuizData({
+        instructions: "",
+        due_date: "",
+        questions: [],
+      });
     } catch (err) {
       console.error("Post creation error", err.response?.data || err);
       console.error(JSON.stringify(err.response?.data, null, 2));
     } finally {
       setCreating(false);
+      window.location.reload();
     }
   };
 
@@ -137,7 +133,7 @@ function CreatePost({ courseId }) {
           </ul>
         </div>
 
-        <form onSubmit={handleCreatePost} className="d-flex flex-column gap-3">
+        <div className="d-flex flex-column gap-3">
           <input
             type="text"
             className="form-control"
@@ -147,15 +143,18 @@ function CreatePost({ courseId }) {
             onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
             required
           />
+
           {selectedType === "announcement" && (
             <AnnouncementForm
               data={announcementData}
               setData={setAnnouncementData}
             />
           )}
+
           {selectedType === "resource" && (
             <ResourceForm data={resourceData} setData={setResourceData} />
           )}
+
           {selectedType === "assignment" && (
             <AssignmentForm data={assignmentData} setData={setAssignmentData} />
           )}
@@ -165,13 +164,13 @@ function CreatePost({ courseId }) {
           )}
 
           <button
-            type="submit"
+            onClick={handleCreatePost}
             className="btn btn-primary w-100"
             disabled={creating}
           >
             {creating ? "Creating..." : "Create Post"}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

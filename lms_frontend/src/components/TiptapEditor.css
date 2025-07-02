@@ -40,3 +40,11 @@
   display: block;
   margin: 0.5rem 0;
 }
+
+pre {
+  background: #e2e2e2;
+  padding: 1rem;
+  border-radius: 0.3rem;
+  overflow-x: auto;
+  font-family: monospace;
+}

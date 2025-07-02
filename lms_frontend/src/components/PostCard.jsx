@@ -57,10 +57,7 @@ function PostCard({ post, isInstructor, handleEdit, handleDelete }) {
             })}
           </small>
           {isInstructor && (
-            <div
-              className="dropdown"
-              onClick={(e) => e.stopPropagation()} // prevent navigation when clicking dropdown
-            >
+            <div className="dropdown" onClick={(e) => e.stopPropagation()}>
               <button
                 className="btn btn-outline-secondary px-1 py-0 dropdown-toggle no-caret"
                 type="button"

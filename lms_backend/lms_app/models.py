@@ -106,9 +106,7 @@ class Announcement(models.Model):
 
 class Resource(models.Model):
     post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='resource', limit_choices_to={'type': 'resource'})
-    file = models.FileField(upload_to='resources/', blank=True)
-    link = models.URLField(blank=True)
-    description = models.TextField(blank=True)
+    content = models.TextField(blank=True)
 
 class Assignment(models.Model):
     SUBMISSION_TYPES = [

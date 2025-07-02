@@ -110,6 +110,16 @@ export default function TiptapEditor({ content, onChange }) {
         <button onClick={setImage} title="Add Image">
           <i className="bi bi-image"></i>
         </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          className={`btn btn-sm btn-outline-secondary ${
+            editor.isActive("codeBlock") ? "active" : ""
+          }`}
+          title="Code Block"
+        >
+          <i className="bi bi-code-slash"></i>
+        </button>
       </div>
 
       <EditorContent editor={editor} />

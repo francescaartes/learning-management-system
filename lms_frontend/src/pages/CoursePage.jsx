@@ -13,6 +13,7 @@ function CoursePage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creatingPost, setCreatingPost] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchCourse = async () => {
@@ -36,12 +37,15 @@ function CoursePage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
+    if (!postToDelete) return;
     try {
-      await api.delete(`posts/${id}/`);
+      await api.delete(`posts/${postToDelete.id}/`);
       fetchPosts();
     } catch (err) {
       console.log("Delete post error", err);
+    } finally {
+      setPostToDelete(null);
     }
   };
 
@@ -116,20 +120,8 @@ function CoursePage() {
                     <PostCard
                       post={post}
                       isInstructor={isInstructor}
-                      handleDelete={setShowDeleteModal}
+                      handleDelete={() => setPostToDelete(post)}
                       handleEdit={handleEdit}
-                    />
-                    <Modal
-                      show={showDeleteModal}
-                      onClose={() => setShowDeleteModal(false)}
-                      title="Confirm Delete"
-                      body="Are you sure you want to permanently delete this post? This action cannot be undone."
-                      confirmText="Delete Post"
-                      confirmClass="btn-danger"
-                      onConfirm={() => {
-                        handleDelete(post.id);
-                        setShowDeleteModal(false);
-                      }}
                     />
                   </div>
                 ))
@@ -138,6 +130,16 @@ function CoursePage() {
           )}
         </div>
       </div>
+
+      <Modal
+        show={!!postToDelete}
+        onClose={() => setPostToDelete(null)}
+        title="Confirm Delete"
+        body={`Are you sure you want to permanently delete "${postToDelete?.title}"? This action cannot be undone.`}
+        confirmText="Delete Post"
+        confirmClass="btn-danger"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
