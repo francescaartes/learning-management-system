@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import api from "../api/api";
 import CreatePost from "../components/CreatePost";
 import { useUser } from "../contexts/UserContext";
+import PostCard from "../components/PostCard";
+import Modal from "../components/Modal";
 
 function CoursePage() {
   const { user } = useUser();
@@ -11,6 +13,7 @@ function CoursePage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creatingPost, setCreatingPost] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchCourse = async () => {
     try {
@@ -42,19 +45,14 @@ function CoursePage() {
     }
   };
 
+  const handleEdit = async () => {};
+
   useEffect(() => {
     fetchCourse();
     fetchPosts();
   }, [courseId]);
 
   const isInstructor = course.instructor === user.id;
-
-  const typeColors = {
-    announcement: "primary",
-    resource: "info",
-    assignment: "warning",
-    quiz: "success",
-  };
 
   if (loading) return <div className="text-center mt-5">Loading...</div>;
 
@@ -114,110 +112,25 @@ function CoursePage() {
                 <div className="text-muted text-center">No posts yet.</div>
               ) : (
                 posts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="card mb-3 shadow-sm"
-                    style={{ maxHeight: "30rem" }}
-                  >
-                    <div className="d-flex justify-content-between align-items-center card-body pb-0">
-                      <span
-                        className={`badge bg-${
-                          typeColors[post.type] || "secondary"
-                        }`}
-                      >
-                        {post.type.toUpperCase()}
-                      </span>
-                      <span className="d-flex gap-3 align-items-center">
-                        <small className="text-muted">
-                          {new Date(post.created_on).toLocaleString("en-US", {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
-                        </small>
-                        {isInstructor && (
-                          <div className="dropdown">
-                            <button
-                              className="btn btn-outline-secondary px-1 py-0 dropdown-toggle no-caret"
-                              type="button"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
-                            >
-                              <i className="bi bi-three-dots p-0 m-0"></i>
-                            </button>
-                            <ul className="dropdown-menu dropdown-menu-end">
-                              <li>
-                                <button
-                                  className="dropdown-item"
-                                  onClick={() => handleEdit(post.id)}
-                                >
-                                  Edit
-                                </button>
-                              </li>
-                              <li>
-                                <button
-                                  className="dropdown-item text-danger"
-                                  onClick={() => handleDelete(post.id)}
-                                >
-                                  Delete
-                                </button>
-                              </li>
-                            </ul>
-                          </div>
-                        )}
-                      </span>
-                    </div>
-                    <a href={``} className="text-decoration-none text-black">
-                      <div className="card-body pt-0">
-                        <div className="d-flex flex-column gap-2">
-                          <h5 className="mt-2 mb-0">{post.title}</h5>
-                          {post.type === "announcement" && (
-                            <div className="">
-                              <div>
-                                <p
-                                  className="m-0 html-content"
-                                  dangerouslySetInnerHTML={{
-                                    __html: post.announcement.message,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          )}
-                          {post.type === "quiz" && (
-                            <div className="">
-                              <div>
-                                <p className="m-0">
-                                  <strong>Number of items: </strong>
-                                  {post.quiz.questions.length}
-                                </p>
-                                <p className="m-0">
-                                  <strong>Due date: </strong>
-                                  {new Date(post.quiz.due_date).toLocaleString(
-                                    "en-US",
-                                    {
-                                      weekday: "long",
-                                      year: "numeric",
-                                      month: "long",
-                                      day: "numeric",
-                                      hour: "numeric",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    }
-                                  )}
-                                </p>
-                                <p className="m-0 mt-2">
-                                  {post.quiz.instructions}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </a>
+                  <div key={post.id}>
+                    <PostCard
+                      post={post}
+                      isInstructor={isInstructor}
+                      handleDelete={setShowDeleteModal}
+                      handleEdit={handleEdit}
+                    />
+                    <Modal
+                      show={showDeleteModal}
+                      onClose={() => setShowDeleteModal(false)}
+                      title="Confirm Delete"
+                      body="Are you sure you want to permanently delete this post? This action cannot be undone."
+                      confirmText="Delete Post"
+                      confirmClass="btn-danger"
+                      onConfirm={() => {
+                        handleDelete(post.id);
+                        setShowDeleteModal(false);
+                      }}
+                    />
                   </div>
                 ))
               )}

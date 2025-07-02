@@ -1,5 +1,8 @@
 import { useState } from "react";
 import AnnouncementForm from "./CreatePost/AnnouncementForm";
+import ResourceForm from "./CreatePost/ResourceForm";
+import QuizForm from "./CreatePost/QuizForm";
+import AssignmentForm from "./CreatePost/AssignmentForm";
 import api from "../api/api";
 
 function CreatePost({ courseId }) {
@@ -40,32 +43,64 @@ function CreatePost({ courseId }) {
   const handleCreatePost = async (e) => {
     setCreating(true);
 
-    const postData = {
-      ...newPost,
-      type: selectedType,
-      [selectedType]: {
-        ...(selectedType === "announcement" && announcementData),
-        ...(selectedType === "resource" && resourceData),
-        ...(selectedType === "assignment" && assignmentData),
-        ...(selectedType === "quiz" && {
-          ...quizData,
-          questions: quizData.questions.map((q) => ({
-            question_text: q.question_text,
-            options: q.options,
-            correct_answer: q.correct_answer,
-          })),
-        }),
-      },
-    };
-
-    console.log(postData);
-
     try {
-      await api.post(`posts/`, postData);
+      if (selectedType === "resource") {
+        const formData = new FormData();
+        formData.append("title", newPost.title);
+        formData.append("type", selectedType);
+        formData.append("course", courseId);
+
+        if (resourceData.file) {
+          formData.append("resource.file", resourceData.file);
+        }
+        if (resourceData.link) {
+          formData.append("resource.link", resourceData.link);
+        }
+        if (resourceData.description) {
+          formData.append("resource.description", resourceData.description);
+        }
+
+        console.log("FORMDATA:", [...formData.entries()]);
+
+        await api.post(`posts/`, formData);
+      } else {
+        const postData = {
+          title: newPost.title,
+          type: selectedType,
+          course: courseId,
+          ...(selectedType === "announcement" && {
+            announcement: announcementData,
+          }),
+          ...(selectedType === "assignment" && {
+            assignment: {
+              instructions: assignmentData.instructions,
+              due_date: assignmentData.due_date,
+              max_score: Number(assignmentData.max_score),
+              submission_type: assignmentData.submission_type,
+            },
+          }),
+          ...(selectedType === "quiz" && {
+            quiz: {
+              instructions: quizData.instructions,
+              due_date: quizData.due_date,
+              questions: quizData.questions.map((q) => ({
+                question_text: q.question_text,
+                options: q.options,
+                correct_answer: q.correct_answer,
+              })),
+            },
+          }),
+        };
+
+        console.log("POST DATA:", JSON.stringify(postData, null, 2));
+        await api.post(`posts/`, postData);
+      }
+
       console.log("Post created!");
       setNewPost({ title: "", type: "announcement", course: courseId });
     } catch (err) {
       console.error("Post creation error", err.response?.data || err);
+      console.error(JSON.stringify(err.response?.data, null, 2));
     } finally {
       setCreating(false);
     }
@@ -117,6 +152,16 @@ function CreatePost({ courseId }) {
               data={announcementData}
               setData={setAnnouncementData}
             />
+          )}
+          {selectedType === "resource" && (
+            <ResourceForm data={resourceData} setData={setResourceData} />
+          )}
+          {selectedType === "assignment" && (
+            <AssignmentForm data={assignmentData} setData={setAssignmentData} />
+          )}
+
+          {selectedType === "quiz" && (
+            <QuizForm data={quizData} setData={setQuizData} />
           )}
 
           <button

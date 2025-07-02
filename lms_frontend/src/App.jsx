@@ -16,6 +16,7 @@ import PublicRoute from "./route/PublicRoute";
 import StartTeaching from "./pages/StartTeaching";
 import CreateCourse from "./pages/CreateCourse";
 import CoursePage from "./pages/CoursePage";
+import PostDetail from "./pages/PostDetail";
 
 function App() {
   return (
@@ -83,6 +84,14 @@ function App() {
             element={
               <PrivateRoute>
                 <CreateCourse />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/posts/:postId"
+            element={
+              <PrivateRoute>
+                <PostDetail />
               </PrivateRoute>
             }
           />
