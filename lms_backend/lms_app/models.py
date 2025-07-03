@@ -120,6 +120,18 @@ class Assignment(models.Model):
     max_score = models.PositiveIntegerField(default=100)
     submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPES, default='file')
 
+class Submission(models.Model):
+    assignment = models.ForeignKey("Assignment", on_delete=models.CASCADE, related_name="submissions")
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    file = models.FileField(upload_to="submissions/", blank=True, null=True)
+    text = models.TextField(blank=True)
+    link = models.URLField(blank=True)
+    submitted_on = models.DateTimeField(auto_now_add=True)
+    score = models.PositiveBigIntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.assignment.id} - {self.student.username}"
+
 class Quiz(models.Model):
     post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='quiz', limit_choices_to={'type': 'quiz'})
     instructions = models.TextField()

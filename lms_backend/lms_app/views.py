@@ -169,6 +169,89 @@ class QuizViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.QuizSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+class SubmissionCreateView(generics.ListCreateAPIView):
+    queryset = models.Submission.objects.all()
+    serializer_class = serializers.SubmissionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        student = self.request.user
+        assignment = serializer.validated_data["assignment"]
+        course = assignment.post.course
+
+        enrolled = models.Enrollment.objects.filter(course=course, student=student).exists()
+        if not enrolled:
+            raise exceptions.ValidationError("You must be enrolled in this course to submit.")
+
+        existing = models.Submission.objects.filter(assignment=assignment, student=student).first()
+        if existing:
+            raise exceptions.ValidationError("You have already submitted this assignment.")
+
+        serializer.save(student=student)
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(student=self.request.user)
+        assignment_id = self.request.query_params.get("assignment")
+        if assignment_id:
+            queryset = queryset.filter(assignment_id=assignment_id)
+        return queryset
+
+class SubmissionDeleteView(generics.DestroyAPIView):
+    queryset = models.Submission.objects.all()
+    serializer_class = serializers.SubmissionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(student=self.request.user)
+
+class InstructorSubmissionsListView(generics.ListAPIView):
+    serializer_class = serializers.SubmissionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        assignment_id = self.request.query_params.get('assignment')
+        if not assignment_id:
+            raise exceptions.ValidationError("assignment parameter is required.")
+        
+        try:
+            assignment = models.Assignment.objects.select_related('post__course').get(id=assignment_id)
+        except models.Assignment.DoesNotExist:
+            raise exceptions.NotFound("Assignment not found.")
+
+        course = assignment.post.course
+        if course.instructor != self.request.user:
+            raise exceptions.PermissionDenied("You are not the instructor of this course.")
+
+        return models.Submission.objects.filter(assignment=assignment).select_related("student").order_by("-submitted_on")
+
+class SubmissionScoreUpdateView(generics.UpdateAPIView):
+    queryset = models.Submission.objects.all()
+    serializer_class = serializers.SubmissionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, *args, **kwargs):
+        submission = self.get_object()
+
+        if submission.assignment.post.course.instructor != request.user:
+            return response.Response({"detail": "You do not have permission to grade this submission."}, status=403)
+
+        score = request.data.get("score")
+        if score is None:
+            return response.Response({"detail": "Score is required."}, status=400)
+
+        try:
+            score = int(score)
+        except ValueError:
+            return response.Response({"detail": "Score must be an integer."}, status=400)
+
+        if score < 0 or score > submission.assignment.max_score:
+            return response.Response({"detail": f"Score must be between 0 and {submission.assignment.max_score}."}, status=400)
+
+        submission.score = score
+        submission.save()
+
+        return response.Response({"detail": "Score updated successfully."})
+
 class EnrollmentList(generics.ListCreateAPIView):
     serializer_class = serializers.EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]

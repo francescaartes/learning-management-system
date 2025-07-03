@@ -8,6 +8,8 @@ import Announcement from "../components/PostType/Announcement";
 import Resource from "../components/PostType/Resource";
 import Assignment from "../components/PostType/Assignment";
 import Quiz from "../components/PostType/Quiz";
+import AssignmentSubmissionForm from "../components/AssignmentSubmissionForm";
+import AssignmentSubmissionsList from "../components/AssignmentSubmissionList";
 
 function PostDetail() {
   const { postId } = useParams();
@@ -101,6 +103,12 @@ function PostDetail() {
               )}
             </div>
           </div>
+
+          {post.type === "assignment" && user?.id === post.author && (
+            <div className="card shadow-sm mt-4">
+              <AssignmentSubmissionsList assignmentId={post.assignment.id} />
+            </div>
+          )}
         </div>
 
         <div className="col-lg-9">
@@ -110,6 +118,13 @@ function PostDetail() {
             {post.type === "assignment" && <Assignment post={post} />}
             {post.type === "quiz" && <Quiz post={post} />}
           </div>
+
+          {post.type === "assignment" && user?.id !== post.author && (
+            <AssignmentSubmissionForm
+              assignmentId={post.assignment.id}
+              submissionType={post.assignment.submission_type}
+            />
+          )}
         </div>
       </div>
 

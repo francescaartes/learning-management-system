@@ -17,6 +17,7 @@ import StartTeaching from "./pages/StartTeaching";
 import CreateCourse from "./pages/CreateCourse";
 import CoursePage from "./pages/CoursePage";
 import PostDetail from "./pages/PostDetail";
+import AssignmentSubmissionsPage from "./pages/AssignmentSubmissionsPage";
 
 function App() {
   return (
@@ -92,6 +93,14 @@ function App() {
             element={
               <PrivateRoute>
                 <PostDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/assignments/:assignmentId/submissions"
+            element={
+              <PrivateRoute>
+                <AssignmentSubmissionsPage />
               </PrivateRoute>
             }
           />

@@ -1,12 +1,12 @@
-// components/TiptapEditor.jsx
 import React, { useCallback } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
 import "./TiptapEditor.css";
 
-export default function TiptapEditor({ content, onChange }) {
+export default function TiptapEditor({ content, onChange, placeholder }) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -17,8 +17,14 @@ export default function TiptapEditor({ content, onChange }) {
       Link.configure({
         openOnClick: true,
       }),
+      Placeholder.configure({
+        placeholder: placeholder || "Type something...",
+        emptyEditorClass: "is-editor-empty",
+        showOnlyWhenEditable: true,
+        showOnlyCurrent: false,
+      }),
     ],
-    content,
+    content: "" || content,
     onUpdate({ editor }) {
       onChange(editor.getHTML());
     },

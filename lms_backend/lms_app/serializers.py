@@ -95,6 +95,43 @@ class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Quiz
         exclude = ['post']
+class SubmissionSerializer(serializers.ModelSerializer):
+    student_username = serializers.CharField(source="student.username", read_only=True)
+    student_full_name = serializers.SerializerMethodField()
+    assignment_title = serializers.CharField(source="assignment.post.title", read_only=True)
+    class Meta:
+        model = models.Submission
+        fields = ["id", "assignment", "assignment_title", "student_username", "student_full_name", "file", "text", "link", "submitted_on", "score"]
+        read_only_fields = ["student_username", "student_full_name", "submitted_on", "student"]
+
+    def get_student_full_name(self, obj):
+        full_name = f"{obj.student.first_name} {obj.student.last_name}".strip()
+        return full_name if full_name else obj.student.username
+    
+    def create(self, validated_data):
+        request = self.context.get("request")
+        if not request:
+            raise serializers.ValidationError("Request context is required to set the student.")
+        validated_data["student"] = request.user
+        return super().create(validated_data)
+
+
+    def validate(self, data):
+        file = data.get("file")
+        text = data.get("text")
+        link = data.get("link")
+
+        if not file and not text and not link:
+            raise serializers.ValidationError("You must provide either a file, text, or link.")
+
+        if sum(bool(v) for v in [file, text, link]) > 1:
+            raise serializers.ValidationError("You can only submit one type (file, text, or link).")
+
+        return data
+
+    def create(self, validated_data):
+        validated_data["student"] = self.context["request"].user
+        return super().create(validated_data)
 
 class PostSerializer(serializers.ModelSerializer):
     announcement = AnnouncementSerializer(required=False)

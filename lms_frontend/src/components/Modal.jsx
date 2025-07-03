@@ -8,6 +8,7 @@ const Modal = ({
   confirmText,
   confirmClass = "btn-primary",
   onConfirm,
+  size = "md",
 }) => {
   if (!show) return null;
 
@@ -18,7 +19,12 @@ const Modal = ({
       role="dialog"
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
-      <div className="modal-dialog" role="document">
+      <div
+        className={`modal-dialog ${
+          size === "lg" ? "modal-lg" : size === "xl" ? "modal-xl" : ""
+        }`}
+        role="document"
+      >
         <div className="modal-content">
           <div className="modal-header">
             <h5
@@ -34,9 +40,7 @@ const Modal = ({
               onClick={onClose}
             ></button>
           </div>
-          <div className="modal-body">
-            <p>{body}</p>
-          </div>
+          <div className="modal-body">{body}</div>
           <div className="modal-footer">
             <button
               type="button"
@@ -45,13 +49,15 @@ const Modal = ({
             >
               Cancel
             </button>
-            <button
-              type="button"
-              className={`btn ${confirmClass}`}
-              onClick={onConfirm}
-            >
-              {confirmText}
-            </button>
+            {onConfirm && (
+              <button
+                type="button"
+                className={`btn ${confirmClass}`}
+                onClick={onConfirm}
+              >
+                {confirmText}
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ function ResourceForm({ data, setData }) {
       <TipTapEditor
         content={data.content}
         onChange={(html) => setData({ ...data, content: html })}
+        placeholder="Write your content here..."
       />
     </div>
   );
