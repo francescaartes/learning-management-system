@@ -136,12 +136,21 @@ class Quiz(models.Model):
     post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='quiz', limit_choices_to={'type': 'quiz'})
     instructions = models.TextField()
     due_date = models.DateTimeField()
+    max_attempts = models.PositiveIntegerField(default=1)
 
 class QuizQuestion(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
     question_text = models.TextField()
     options = models.JSONField() 
     correct_answer = models.CharField(max_length=255)
+
+class QuizAttempt(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
+    student = models.ForeignKey("User", on_delete=models.CASCADE, related_name="quiz_attempts")
+    started_on = models.DateTimeField(auto_now_add=True)
+    submitted_on = models.DateTimeField(null=True, blank=True)
+    score = models.PositiveIntegerField(null=True, blank=True)
+    answers = models.JSONField()
 
 class Enrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')

@@ -91,10 +91,94 @@ class QuizQuestionSerializer(serializers.ModelSerializer):
 
 class QuizSerializer(serializers.ModelSerializer):
     questions = QuizQuestionSerializer(many=True)
+    author = serializers.ReadOnlyField(source="post.author.id")
+    title = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Quiz
         exclude = ['post']
+
+    def get_title(self, obj):
+        return obj.post.title
+
+class QuizInfoSerializer(serializers.ModelSerializer):
+    attempts_made = serializers.SerializerMethodField()
+    remaining_attempts = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Quiz
+        fields = ["id", "instructions", "due_date", "max_attempts", "attempts_made", "remaining_attempts"]
+
+    def get_attempts_made(self, obj):
+        user = self.context["request"].user
+        if not user.is_authenticated:
+            return 0
+        return obj.attempts.filter(student=user).count()
+
+    def get_remaining_attempts(self, obj):
+        attempts = self.get_attempts_made(obj)
+        return max(obj.max_attempts - attempts, 0)
+
+class QuizAttemptSerializer(serializers.ModelSerializer):
+    total = serializers.SerializerMethodField()
+    student_name = serializers.SerializerMethodField()
+    class Meta:
+        model = models.QuizAttempt
+        fields = ['id', 'quiz', 'student', "student_name", 'score', 'answers', 'started_on', 'submitted_on', 'total']
+        read_only_fields = ["student", "started_on", "score", "submitted_on"]
+    
+    def get_total(self, obj):
+        return obj.quiz.questions.count()
+    
+    def get_student_name(self, obj):
+        if obj.student.first_name or obj.student.last_name:
+            return f"{obj.student.first_name} {obj.student.last_name}".strip()
+        return obj.student.username
+class QuizAttemptSummarySerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source="student.get_full_name", read_only=True)
+
+    class Meta:
+        model = models.QuizAttempt
+        fields = ["id", "student_name", "score", "submitted_on"]
+
+class InstructorQuizDetailSerializer(serializers.ModelSerializer):
+    attempts = serializers.SerializerMethodField()
+    questions = serializers.SerializerMethodField()
+    author = serializers.IntegerField(source="post.course.instructor.id", read_only=True)
+    title = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Quiz
+        fields = [
+            "id",
+            "title",
+            "instructions",
+            "due_date",
+            "max_attempts",
+            "author",
+            "questions",
+            "attempts",
+        ]
+
+    def get_title(self, obj):
+        return obj.post.title
+
+    def get_attempts(self, obj):
+        attempts = obj.attempts.select_related("student")
+        return QuizAttemptSerializer(attempts, many=True).data
+
+    def get_questions(self, obj):
+        return [
+            {
+                "id": q.id,
+                "question_text": q.question_text,
+                "options": q.options,
+                "correct_answer": q.correct_answer,
+            }
+            for q in obj.questions.all()
+        ]
+
+
 class SubmissionSerializer(serializers.ModelSerializer):
     student_username = serializers.CharField(source="student.username", read_only=True)
     student_full_name = serializers.SerializerMethodField()

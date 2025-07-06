@@ -4,6 +4,7 @@ from django.db.models import Count, Q
 from .permissions import IsInstructorOrReadOnly
 from . import serializers
 from . import models
+from django.utils import timezone
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
@@ -186,6 +187,9 @@ class SubmissionCreateView(generics.ListCreateAPIView):
         existing = models.Submission.objects.filter(assignment=assignment, student=student).first()
         if existing:
             raise exceptions.ValidationError("You have already submitted this assignment.")
+        
+        if assignment.due_date and timezone.now() > assignment.due_date:
+            raise exceptions.ValidationError("The submission deadline has passed.")
 
         serializer.save(student=student)
 
@@ -251,6 +255,110 @@ class SubmissionScoreUpdateView(generics.UpdateAPIView):
         submission.save()
 
         return response.Response({"detail": "Score updated successfully."})
+
+class QuizInfoView(generics.RetrieveAPIView):
+    queryset = models.Quiz.objects.all()
+    serializer_class = serializers.QuizInfoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        quiz = super().get_object()
+        user = self.request.user
+        course = quiz.post.course
+
+        enrolled = models.Enrollment.objects.filter(course=course, student=user).exists()
+        if not enrolled:
+            raise exceptions.PermissionDenied("You must be enrolled to view this quiz.")
+        return quiz
+
+class QuizAttemptListCreateView(generics.ListCreateAPIView):
+    serializer_class = serializers.QuizAttemptSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = models.QuizAttempt.objects.filter(student=self.request.user)
+        quiz_id = self.request.query_params.get("quiz")
+        if quiz_id:
+            queryset = queryset.filter(quiz_id=quiz_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        quiz_id = self.request.data.get("quiz")
+        if not quiz_id:
+            raise exceptions.ValidationError({"quiz": "This field is required."})
+
+        quiz = models.Quiz.objects.get(id=quiz_id)
+        course = quiz.post.course
+
+        enrolled = models.Enrollment.objects.filter(course=course, student=self.request.user).exists()
+        if not enrolled:
+            raise exceptions.PermissionDenied("You must be enrolled to attempt this quiz.")
+
+        prior_attempts = models.QuizAttempt.objects.filter(student=self.request.user, quiz=quiz).count()
+        if prior_attempts >= quiz.max_attempts:
+            raise exceptions.ValidationError(f"You have reached the maximum of {quiz.max_attempts} attempts.")
+
+        answers = self.request.data.get("answers", {})
+        correct_count = 0
+        total_questions = quiz.questions.count()
+
+        for q in quiz.questions.all():
+            submitted_answer = answers.get(str(q.id))
+            if submitted_answer is not None and submitted_answer.strip() == q.correct_answer.strip():
+                correct_count += 1
+
+        serializer.save(
+            student=self.request.user,
+            quiz=quiz,
+            score=correct_count, 
+            answers=answers,
+            submitted_on=timezone.now()
+        )
+
+        self._custom_response = {
+            "score": correct_count,
+            "total": total_questions,
+        }
+
+    def create(self, request, *args, **kwargs):
+        super().create(request, *args, **kwargs)
+        return response.Response(self._custom_response, status=status.HTTP_201_CREATED)
+
+class QuizAttemptDetailView(generics.RetrieveAPIView):
+    queryset = models.QuizAttempt.objects.all()
+    serializer_class = serializers.QuizAttemptSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        attempt = super().get_object()
+        if attempt.student != self.request.user:
+            raise exceptions.PermissionDenied("You do not have access to this attempt.")
+        return attempt
+
+class InstructorQuizDetailView(generics.RetrieveAPIView):
+    queryset = models.Quiz.objects.all()
+    serializer_class = serializers.InstructorQuizDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        quiz = super().get_object()
+        user = self.request.user
+
+        if quiz.post.course.instructor != user:
+            raise exceptions.PermissionDenied("You are not the instructor of this course.")
+
+        return quiz
+    
+class MyQuizAttemptsView(generics.ListAPIView):
+    serializer_class = serializers.QuizAttemptSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        quiz_id = self.kwargs["quiz_id"]
+        return models.QuizAttempt.objects.filter(
+            quiz_id=quiz_id,
+            student=self.request.user
+        ).order_by("-started_on")
 
 class EnrollmentList(generics.ListCreateAPIView):
     serializer_class = serializers.EnrollmentSerializer
