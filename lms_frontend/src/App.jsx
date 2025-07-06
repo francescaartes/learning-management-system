@@ -18,6 +18,7 @@ import CreateCourse from "./pages/CreateCourse";
 import CoursePage from "./pages/CoursePage";
 import PostDetail from "./pages/PostDetail";
 import AssignmentSubmissionsPage from "./pages/AssignmentSubmissionsPage";
+import QuizPage from "./pages/QuizPage";
 
 function App() {
   return (
@@ -101,6 +102,14 @@ function App() {
             element={
               <PrivateRoute>
                 <AssignmentSubmissionsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/quiz/:quizId"
+            element={
+              <PrivateRoute>
+                <QuizPage />
               </PrivateRoute>
             }
           />
