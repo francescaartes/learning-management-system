@@ -90,8 +90,6 @@ function PostCard({ post, isInstructor, handleEdit, handleDelete }) {
 
       <div ref={contentRef} className="card-body pt-0">
         <div className="d-flex flex-column gap-2">
-          <h5 className="mt-2 mb-0">{post.title}</h5>
-
           {post.type === "announcement" && <Announcement post={post} />}
           {post.type === "quiz" && <Quiz post={post} />}
           {post.type === "resource" && <Resource post={post} />}

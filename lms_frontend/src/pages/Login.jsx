@@ -37,7 +37,11 @@ function Login() {
       await fetchUser();
       navigate("/dashboard");
     } catch (err) {
-      setError("Incorrect password or username.");
+      if (err.response?.status === 401) {
+        setError("Incorrect username or password.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     }
   };
 

@@ -116,7 +116,7 @@ function CoursePage() {
                 <div className="text-muted text-center">No posts yet.</div>
               ) : (
                 posts.map((post) => (
-                  <div key={post.id}>
+                  <div key={post.id} className="mb-4">
                     <PostCard
                       post={post}
                       isInstructor={isInstructor}
