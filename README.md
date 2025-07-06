@@ -9,28 +9,33 @@ This platform enables instructors to create and manage courses, students to enro
 ## Features
 
 **User Authentication**
-  - JWT-based login & registration
-  - Role-based permissions (Instructor / Student)
+
+- JWT-based login & registration
+- Role-based permissions (Instructor / Student)
 
 **Instructor Capabilities**
-  - Create and publish courses
-  - Manage announcements, resources, assignments, and quizzes
-  - Review and grade submissions
+
+- Create and publish courses
+- Manage announcements, resources, assignments, and quizzes
+- Review and grade submissions
 
 **Student Capabilities**
-  - Enroll in courses
-  - View and submit assignments
-  - Attempt quizzes
-  - Leave course reviews
+
+- Enroll in courses
+- View and submit assignments
+- Attempt quizzes
+- Leave course reviews
 
 **RESTful API**
-  - Secure endpoints with JWT authentication
-  - Django Filters for querying
+
+- Secure endpoints with JWT authentication
+- Django Filters for querying
 
 **Responsive Frontend**
-  - Built with React and React Router
-  - Protected routes for authenticated users
-  - Modern, clean interface
+
+- Built with React and React Router
+- Protected routes for authenticated users
+- Modern, clean interface
 
 ---
 
@@ -53,6 +58,7 @@ Make sure you have installed:
 - **npm** 10+
 
 To confirm, run:
+
 ```bash
 python --version
 node --version
@@ -97,6 +103,7 @@ npm --version
 5. **Configure environment variables**
 
    Create a `.env` file in the project root:
+
    ```
    NAME=your_db_name
    USER=your_db_user
@@ -124,6 +131,7 @@ npm --version
    ```
 
    The API will be available at:
+
    ```
    http://127.0.0.1:8000/
    ```
@@ -147,21 +155,24 @@ npm --version
    ```
 
 3. **Configure environment variables (optional)**
-   
+
    Create a .env file in frontend/:
+
    ```bash
    VITE_API_URL=http://127.0.0.1:8000
    ```
-5.  **Run React development server**
 
-   ```bash
-   npm run dev
-   ```
+4. **Run React development server**
 
-   The app will be served at:
-   ```
-   http://localhost:5173/
-   ```
+```bash
+npm run dev
+```
+
+The app will be served at:
+
+```
+http://localhost:5173/
+```
 
 ---
 
@@ -169,17 +180,17 @@ npm --version
 
 Some key endpoints:
 
-| Endpoint                                      | Method   | Description                         |
-|-----------------------------------------------|----------|-------------------------------------|
-| `/register/`                                  | POST     | User registration                   |
-| `/me/`                                        | GET      | Get current user info               |
-| `/courses/`                                   | GET      | List courses                        |
-| `/create_course/`                             | POST     | Create new course                   |
-| `/courses/{id}/`                              | GET      | Course detail                       |
-| `/enrollments/`                               | POST     | Enroll in a course                  |
-| `/posts/`                                     | GET/POST | Course posts                        |
-| `/quiz-attempts/`                             | POST     | Submit quiz answers                 |
-| `/submissions/`                               | POST     | Submit assignment                   |
+| Endpoint          | Method   | Description           |
+| ----------------- | -------- | --------------------- |
+| `/register/`      | POST     | User registration     |
+| `/me/`            | GET      | Get current user info |
+| `/courses/`       | GET      | List courses          |
+| `/create_course/` | POST     | Create new course     |
+| `/courses/{id}/`  | GET      | Course detail         |
+| `/enrollments/`   | POST     | Enroll in a course    |
+| `/posts/`         | GET/POST | Course posts          |
+| `/quiz-attempts/` | POST     | Submit quiz answers   |
+| `/submissions/`   | POST     | Submit assignment     |
 
 Full API reference available in `lms_app/urls.py`.
 
@@ -220,4 +231,3 @@ learning-management-system/
 ## Author
 
 [Francesca Artes](https://github.com/francescaartes)
-
