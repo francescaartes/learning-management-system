@@ -5,6 +5,8 @@ import CreatePost from "../components/CreatePost";
 import { useUser } from "../contexts/UserContext";
 import PostCard from "../components/PostCard";
 import Modal from "../components/Modal";
+import ToDoList from "../components/ToDoList";
+import EnrolledStudentsCard from "../components/EnrolledStudentsCard";
 
 function CoursePage() {
   const { user } = useUser();
@@ -14,18 +16,20 @@ function CoursePage() {
   const [loading, setLoading] = useState(true);
   const [creatingPost, setCreatingPost] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchCourse = async () => {
     try {
       const res = await api.get(`courses/${courseId}/`);
       setCourse(res.data);
+      console.log(res.data);
     } catch (err) {
       console.error("Course fetch error", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const isInstructor = course.instructor === user.id;
 
   const fetchPosts = async () => {
     try {
@@ -55,8 +59,6 @@ function CoursePage() {
     fetchCourse();
     fetchPosts();
   }, [courseId]);
-
-  const isInstructor = course.instructor === user.id;
 
   if (loading) return <div className="text-center mt-5">Loading...</div>;
 
@@ -101,6 +103,8 @@ function CoursePage() {
               )}
             </div>
           </div>
+          {!isInstructor && <ToDoList courseId={courseId} />}
+          {isInstructor && <EnrolledStudentsCard courseId={courseId} />}
         </div>
 
         <div className="col-lg-8">

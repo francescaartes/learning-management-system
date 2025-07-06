@@ -72,10 +72,6 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
         setErrorMessage("Assignment instructions cannot be empty.");
         return;
       }
-      if (!assignmentData.due_date) {
-        setErrorMessage("Please set a due date for the assignment.");
-        return;
-      }
       if (!assignmentData.max_score) {
         setErrorMessage("Please set a maximum score for the assignment.");
         return;
@@ -90,10 +86,6 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
     if (selectedType === "quiz") {
       if (!quizData.instructions.trim()) {
         setErrorMessage("Quiz instructions cannot be empty.");
-        return;
-      }
-      if (!quizData.due_date) {
-        setErrorMessage("Please set a due date for the quiz.");
         return;
       }
       if (!quizData.time_limit || quizData.time_limit < 1) {
@@ -143,7 +135,7 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
         ...(selectedType === "assignment" && {
           assignment: {
             instructions: assignmentData.instructions,
-            due_date: assignmentData.due_date,
+            due_date: assignmentData.due_date || null,
             max_score: Number(assignmentData.max_score),
             submission_type: assignmentData.submission_type,
           },
@@ -151,7 +143,7 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
         ...(selectedType === "quiz" && {
           quiz: {
             instructions: quizData.instructions,
-            due_date: quizData.due_date,
+            due_date: quizData.due_date || null,
             time_limit: Number(quizData.time_limit),
             max_attempts: Number(quizData.max_attempts),
             questions: quizData.questions.map((q) => ({

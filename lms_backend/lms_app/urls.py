@@ -36,4 +36,6 @@ urlpatterns = [
     path('quiz-attempts/<int:pk>/', views.QuizAttemptDetailView.as_view()),
     path("quizzes/<int:pk>/instructor_detail/", views.InstructorQuizDetailView.as_view()),
     path("quizzes/<int:quiz_id>/my_attempts/", views.MyQuizAttemptsView.as_view()),
+
+    path("todo/", views.TodoListView.as_view()),
 ]

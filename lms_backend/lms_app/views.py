@@ -5,6 +5,7 @@ from .permissions import IsInstructorOrReadOnly
 from . import serializers
 from . import models
 from django.utils import timezone
+from datetime import datetime
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
@@ -359,6 +360,55 @@ class MyQuizAttemptsView(generics.ListAPIView):
             quiz_id=quiz_id,
             student=self.request.user
         ).order_by("-started_on")
+    
+from datetime import datetime
+
+class TodoListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        course_id = request.query_params.get("course")
+
+        assignments = models.Assignment.objects.filter(
+            post__course__enrollments__student=user
+        )
+        quizzes = models.Quiz.objects.filter(
+            post__course__enrollments__student=user
+        )
+
+        if course_id:
+            assignments = assignments.filter(post__course__id=course_id)
+            quizzes = quizzes.filter(post__course__id=course_id)
+
+        results = []
+
+        for a in assignments:
+            results.append({
+                "id": a.id,
+                "post_id": a.post.id,
+                "title": a.post.title,
+                "type": "assignment",
+                "due_date": a.due_date,
+                "course_title": a.post.course.title,
+            })
+
+        for q in quizzes:
+            results.append({
+                "id": q.id,
+                "post_id": q.post.id,
+                "title": q.post.title,
+                "type": "quiz",
+                "due_date": q.due_date,
+                "course_title": q.post.course.title,
+            })
+
+        FUTURE_DATE = timezone.make_aware(datetime(9999, 12, 31))
+        results.sort(key=lambda x: x["due_date"] or FUTURE_DATE)
+
+        return response.Response(results)
+
 
 class EnrollmentList(generics.ListCreateAPIView):
     serializer_class = serializers.EnrollmentSerializer
@@ -366,16 +416,30 @@ class EnrollmentList(generics.ListCreateAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return models.Enrollment.objects.filter(student=self.request.user, course__is_published=True)
-    
+        user = self.request.user
+        course_id = self.request.query_params.get("course")
+
+        if course_id:
+            try:
+                course = models.Course.objects.get(id=course_id)
+            except models.Course.DoesNotExist:
+                raise exceptions.NotFound("Course not found.")
+
+            if course.instructor == user:
+                return models.Enrollment.objects.filter(course=course)
+            else:
+                return models.Enrollment.objects.filter(course=course, student=user)
+
+        return models.Enrollment.objects.filter(student=user, course__is_published=True)
+
     def perform_create(self, serializer):
         user = self.request.user
         course = serializer.validated_data.get('course')
 
         if course.instructor == user:
             raise exceptions.ValidationError("Instructors cannot enroll in their own course.")
-        
-        if models.Enrollment.objects.filter(course=course, student=user ).exists():
+
+        if models.Enrollment.objects.filter(course=course, student=user).exists():
             raise exceptions.ValidationError("You are already enrolled in this course.")
 
         serializer.save(student=user)

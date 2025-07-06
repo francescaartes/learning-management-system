@@ -279,9 +279,25 @@ class PostSerializer(serializers.ModelSerializer):
 class EnrollmentSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
     course_id = serializers.PrimaryKeyRelatedField(queryset=models.Course.objects.all(), write_only=True, source='course')
+    student_name = serializers.SerializerMethodField()
+    profile_img = serializers.SerializerMethodField()
     class Meta:
         model = models.Enrollment
         fields = '__all__'
+
+    def get_student_name(self, obj):
+        if obj.student.first_name or obj.student.last_name:
+            return f"{obj.student.first_name} {obj.student.last_name}".strip()
+        return obj.student.username
+    
+    def get_profile_img(self, obj):
+        request = self.context.get("request")
+        if obj.student.profile_img:
+            url = obj.student.profile_img.url
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

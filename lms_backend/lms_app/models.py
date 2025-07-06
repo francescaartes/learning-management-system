@@ -116,7 +116,7 @@ class Assignment(models.Model):
     ]
     post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='assignment', limit_choices_to={'type': 'assignment'})
     instructions = models.TextField()
-    due_date = models.DateTimeField()
+    due_date = models.DateTimeField(null=True, blank=True)
     max_score = models.PositiveIntegerField(default=100)
     submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPES, default='file')
 
@@ -135,7 +135,7 @@ class Submission(models.Model):
 class Quiz(models.Model):
     post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='quiz', limit_choices_to={'type': 'quiz'})
     instructions = models.TextField()
-    due_date = models.DateTimeField()
+    due_date = models.DateTimeField(null=True, blank=True)
     max_attempts = models.PositiveIntegerField(default=1)
 
 class QuizQuestion(models.Model):
