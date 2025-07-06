@@ -1,11 +1,11 @@
 from rest_framework import generics, permissions, viewsets, views, response, status, exceptions
 from django_filters import rest_framework as filters
-from django.db.models import Count, Q
+from django.db.models import Count, Q, OuterRef, Subquery, Exists, F
 from .permissions import IsInstructorOrReadOnly
-from . import serializers
-from . import models
 from django.utils import timezone
 from datetime import datetime
+from . import serializers
+from . import models
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = models.User.objects.all()
@@ -361,8 +361,6 @@ class MyQuizAttemptsView(generics.ListAPIView):
             student=self.request.user
         ).order_by("-started_on")
     
-from datetime import datetime
-
 class TodoListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
@@ -371,11 +369,31 @@ class TodoListView(generics.ListAPIView):
         user = request.user
         course_id = request.query_params.get("course")
 
+        submitted_assignments = models.Submission.objects.filter(
+            assignment=OuterRef('pk'),
+            student=user
+        )
         assignments = models.Assignment.objects.filter(
             post__course__enrollments__student=user
+        ).annotate(
+            has_submitted=Exists(submitted_assignments)
+        ).filter(
+            has_submitted=False
         )
+
+        quiz_attempt_counts = models.QuizAttempt.objects.filter(
+            quiz=OuterRef('pk'),
+            student=user
+        ).values('quiz').annotate(
+            count=Count('id')
+        ).values('count')
+
         quizzes = models.Quiz.objects.filter(
             post__course__enrollments__student=user
+        ).annotate(
+            attempt_count=Subquery(quiz_attempt_counts)
+        ).filter(
+            Q(attempt_count__lt=F('max_attempts')) | Q(attempt_count__isnull=True)
         )
 
         if course_id:
@@ -408,6 +426,41 @@ class TodoListView(generics.ListAPIView):
         results.sort(key=lambda x: x["due_date"] or FUTURE_DATE)
 
         return response.Response(results)
+    
+class InstructorRecentSubmissionsView(generics.ListAPIView):
+    serializer_class = serializers.SubmissionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if not user.is_authenticated:
+            raise exceptions.NotAuthenticated("You must be logged in.")
+
+        return (
+            models.Submission.objects.filter(
+                assignment__post__course__instructor=user
+            )
+            .select_related(
+                "student",
+                "assignment",
+                "assignment__post",
+                "assignment__post__course"
+            )
+            .order_by("-submitted_on")[:10]
+        )
+    
+class MyAnnouncementsView(generics.ListAPIView):
+    serializer_class = serializers.PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+
+    def get_queryset(self):
+        user = self.request.user
+        return models.Post.objects.filter(
+            type='announcement',
+            course__enrollments__student=user
+        ).order_by('-created_on')
 
 
 class EnrollmentList(generics.ListCreateAPIView):

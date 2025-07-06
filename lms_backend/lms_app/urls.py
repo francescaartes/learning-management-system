@@ -38,4 +38,6 @@ urlpatterns = [
     path("quizzes/<int:quiz_id>/my_attempts/", views.MyQuizAttemptsView.as_view()),
 
     path("todo/", views.TodoListView.as_view()),
+    path('my_announcements/', views.MyAnnouncementsView.as_view()),
+    path("submissions/recent/", views.InstructorRecentSubmissionsView.as_view()),
 ]
