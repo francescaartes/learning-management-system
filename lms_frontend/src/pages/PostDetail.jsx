@@ -116,7 +116,13 @@ function PostDetail() {
             {post.type === "announcement" && <Announcement post={post} />}
             {post.type === "resource" && <Resource post={post} />}
             {post.type === "assignment" && <Assignment post={post} />}
-            {post.type === "quiz" && <Quiz post={post} />}
+            {post.type === "quiz" && (
+              <Quiz
+                post={post}
+                showGoToQuizButton={true}
+                isInstructor={user?.id === post.author}
+              />
+            )}
           </div>
 
           {post.type === "assignment" && user?.id !== post.author && (

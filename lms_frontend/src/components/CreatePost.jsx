@@ -27,18 +27,104 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
   const [assignmentData, setAssignmentData] = useState({
     instructions: "",
     due_date: "",
-    max_score: 0,
+    max_score: null,
     submission_type: "",
   });
   const [quizData, setQuizData] = useState({
     instructions: "",
     due_date: "",
+    time_limit: 60,
+    max_attempts: 1,
     questions: [],
   });
 
   const [creating, setCreating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleCreatePost = async (e) => {
+  const handleCreatePost = async () => {
+    setErrorMessage(""); // clear previous error
+
+    // General validation
+    if (!newPost.title.trim()) {
+      setErrorMessage("Please provide a title for your post.");
+      return;
+    }
+
+    // Announcement validation
+    if (selectedType === "announcement") {
+      if (!announcementData.message.trim()) {
+        setErrorMessage("Announcement message cannot be empty.");
+        return;
+      }
+    }
+
+    // Resource validation
+    if (selectedType === "resource") {
+      if (!resourceData.content.trim()) {
+        setErrorMessage("Resource content cannot be empty.");
+        return;
+      }
+    }
+
+    // Assignment validation
+    if (selectedType === "assignment") {
+      if (!assignmentData.instructions.trim()) {
+        setErrorMessage("Assignment instructions cannot be empty.");
+        return;
+      }
+      if (!assignmentData.due_date) {
+        setErrorMessage("Please set a due date for the assignment.");
+        return;
+      }
+      if (!assignmentData.max_score) {
+        setErrorMessage("Please set a maximum score for the assignment.");
+        return;
+      }
+      if (!assignmentData.submission_type) {
+        setErrorMessage("Please select a submission type.");
+        return;
+      }
+    }
+
+    // Quiz validation
+    if (selectedType === "quiz") {
+      if (!quizData.instructions.trim()) {
+        setErrorMessage("Quiz instructions cannot be empty.");
+        return;
+      }
+      if (!quizData.due_date) {
+        setErrorMessage("Please set a due date for the quiz.");
+        return;
+      }
+      if (!quizData.time_limit || quizData.time_limit < 1) {
+        setErrorMessage("Time limit must be at least 1 minute.");
+        return;
+      }
+      if (!quizData.max_attempts || quizData.max_attempts < 1) {
+        setErrorMessage("Number of attempts must be at least 1.");
+        return;
+      }
+      if (quizData.questions.length === 0) {
+        setErrorMessage("Please add at least one question to the quiz.");
+        return;
+      }
+
+      for (const [index, q] of quizData.questions.entries()) {
+        if (!q.question_text.trim()) {
+          setErrorMessage(`Question ${index + 1} is missing its text.`);
+          return;
+        }
+        if (q.options.some((opt) => !opt.trim())) {
+          setErrorMessage(`Question ${index + 1} has an empty option.`);
+          return;
+        }
+        if (!q.correct_answer.trim()) {
+          setErrorMessage(`Question ${index + 1} is missing a correct answer.`);
+          return;
+        }
+      }
+    }
+
     setCreating(true);
 
     try {
@@ -66,6 +152,8 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
           quiz: {
             instructions: quizData.instructions,
             due_date: quizData.due_date,
+            time_limit: Number(quizData.time_limit),
+            max_attempts: Number(quizData.max_attempts),
             questions: quizData.questions.map((q) => ({
               question_text: q.question_text,
               options: q.options,
@@ -78,14 +166,10 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
       console.log("POST DATA:", JSON.stringify(postData, null, 2));
       await api.post(`posts/`, postData);
 
-      console.log("Post created!");
-      if (onPostCreated) {
-        onPostCreated();
-      }
-      if (onCancel) {
-        onCancel();
-      }
+      if (onPostCreated) onPostCreated();
+      if (onCancel) onCancel();
 
+      // Reset all forms
       setNewPost({ title: "", type: "announcement", course: courseId });
       setAnnouncementData({ message: "" });
       setResourceData({ content: "" });
@@ -98,11 +182,16 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
       setQuizData({
         instructions: "",
         due_date: "",
+        time_limit: 60,
+        max_attempts: 1,
         questions: [],
       });
     } catch (err) {
       console.error("Post creation error", err.response?.data || err);
-      console.error(JSON.stringify(err.response?.data, null, 2));
+      setErrorMessage(
+        err.response?.data?.detail ||
+          "An error occurred while creating the post."
+      );
     } finally {
       setCreating(false);
     }
@@ -168,7 +257,9 @@ function CreatePost({ courseId, onPostCreated, onCancel }) {
           {selectedType === "quiz" && (
             <QuizForm data={quizData} setData={setQuizData} />
           )}
-
+          {errorMessage && (
+            <div className="alert alert-danger mt-2 m-0">{errorMessage}</div>
+          )}
           <button
             onClick={handleCreatePost}
             className="btn btn-primary w-100"
