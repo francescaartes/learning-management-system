@@ -19,6 +19,7 @@ import CoursePage from "./pages/CoursePage";
 import PostDetail from "./pages/PostDetail";
 import AssignmentSubmissionsPage from "./pages/AssignmentSubmissionsPage";
 import QuizPage from "./pages/QuizPage";
+import MessagePage from "./pages/MessagePage";
 
 function App() {
   return (
@@ -110,6 +111,14 @@ function App() {
             element={
               <PrivateRoute>
                 <QuizPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <PrivateRoute>
+                <MessagePage />
               </PrivateRoute>
             }
           />

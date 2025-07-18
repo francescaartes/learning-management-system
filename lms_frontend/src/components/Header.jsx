@@ -21,6 +21,7 @@ function Header() {
 
   if (user) {
     navItems.push({ label: "Dashboard", to: "/dashboard" });
+    navItems.push({ label: "Messages", to: "/messages" });
   }
 
   const userItems = [
