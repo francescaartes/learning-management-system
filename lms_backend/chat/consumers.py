@@ -4,6 +4,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from .models import Message
 from lms_app.models import Course
+from django.conf import settings
 
 User = get_user_model()
 
@@ -41,18 +42,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 "type": "chat_message",
-                "message": message,
-                "sender": user.username,
-                "timestamp": saved_message.timestamp.isoformat(),
+                "message": {
+                    "id": saved_message.id,
+                    "sender": saved_message.sender.id,
+                    "sender_username": saved_message.sender.username,
+                    "sender_profile_img": (settings.SITE_DOMAIN + saved_message.sender.profile_img.url),
+                    "content": saved_message.content,
+                    "timestamp": str(saved_message.timestamp),
+                },
             }
         )
 
     async def chat_message(self, event):
-        await self.send(text_data=json.dumps({
-            "message": event["message"],
-            "sender": event["sender"],
-            "timestamp": event["timestamp"],
-        }))
+        await self.send(text_data=json.dumps(event["message"]))
 
     @database_sync_to_async
     def save_message(self, user, course_id, message):

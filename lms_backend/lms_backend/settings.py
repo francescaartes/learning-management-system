@@ -31,6 +31,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+SITE_DOMAIN = "http://localhost:8000"
+
 AUTH_USER_MODEL = 'lms_app.User'
 
 # Application definition
